@@ -2,8 +2,8 @@
 	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
 	"organizeImports": { "enabled": true },
 	"files": {
-		"include": ["src/**/*.ts", "static/**/*.{ts,vue}"],
-		"ignore": ["static/**/dist"]
+		"include": ["*.ts"],
+		"ignore": ["**/dist"]
 	},
 	"javascript": {
 		"formatter": {
