@@ -1,4 +1,4 @@
-import { KyInstance } from 'ky';
+import type { KyInstance } from 'ky';
 
 export type PhilTVPairingParams = {
   tvIp: string;

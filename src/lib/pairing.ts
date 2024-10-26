@@ -73,9 +73,9 @@ export class PhilTVPairing {
       })
       .json();
 
-    const { timestamp: authTimestamp, auth_key: authKey, timeout, isSuccess } = res as any;
+    const { timestamp: authTimestamp, auth_key: authKey, timeout, error_id } = res as any;
 
-    if (!isSuccess) {
+    if (error_id !== 'SUCCESS') {
       throw new Error('Failed to start pairing');
     }
 
@@ -128,7 +128,7 @@ export class PhilTVPairing {
 
       const response = (await res?.json()) as any;
 
-      if (!response?.isSuccess) {
+      if (response?.error_id !== 'SUCCESS') {
         return {
           config: undefined,
           error: {
