@@ -1,0 +1,27 @@
+{
+  "name": "philtv-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "pnpm biome lint",
+    "format": "pnpm biome format",
+    "lint:check": "pnpm biome check"
+  },
+  "dependencies": {
+    "digest-fetch": "3.1.1",
+    "ky": "1.7.2",
+    "node-fetch": "3.3.2",
+    "radash": "12.1.0",
+    "unstorage": "1.12.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "22.7.8",
+    "tsx": "4.19.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
