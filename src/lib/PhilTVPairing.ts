@@ -1,8 +1,10 @@
 import { randomBytes } from 'node:crypto';
+import { consola } from 'consola';
 import ky, { type KyInstance } from 'ky';
+import { tryit } from 'radash';
 import { JS_SECRET_KEY } from '../constants';
 import { createKyDigestClient, createKyJointSpaceClient } from '../http-clients';
-import type { CompletePairingResponse, HttpClients, PhilTVPairingParams } from '../types';
+import type { HttpClients, PhilTVPairingParams } from '../types';
 import { createSignature, getDeviceObject, promptText } from '../utils';
 
 export async function getInformationSystem(httpClient: KyInstance) {
@@ -26,7 +28,7 @@ export async function getInformationSystem(httpClient: KyInstance) {
 export class PhilTVPairing {
   private tvBase: PhilTVPairingParams;
   private deviceId!: string;
-  private apiUrls: { unsecure: string; secure: string };
+  private apiUrls: { secure: string };
   private deviceInformation!: ReturnType<typeof getDeviceObject>;
   private httpClients!: HttpClients;
   private startPairingResponse!: { authKey: any; authTimestamp: any; timeout: any };
@@ -37,46 +39,58 @@ export class PhilTVPairing {
     this.tvBase = initParams;
     this.apiUrls = {
       secure: `https://${this.tvBase.tvIp}:${this.tvBase.apiPort}`,
-      unsecure: `http://${this.tvBase.tvIp}:${this.tvBase.apiPort}`,
     };
+    this.deviceId = randomBytes(16).toString('hex');
+    this.deviceInformation = getDeviceObject(this.deviceId);
   }
 
-  async init() {
-    const { apiVersion, isReady } = await getInformationSystem(
+  private async init() {
+    const [errGetInfoSystem, dataInfoSystem] = await tryit(getInformationSystem)(
       ky.create({
         prefixUrl: this.apiUrls.secure,
       }),
     );
 
-    if (!isReady) {
-      throw new Error('TV is not ready for pairing');
+    if (errGetInfoSystem) {
+      consola.error(`
+      ${errGetInfoSystem.message}\n
+      ${errGetInfoSystem.cause}\n
+      Check if the TV is on and the IP is correct.
+      Only Philips TVs with API version 6 or higher are supported.
+      Only secure transport and digest auth pairing are supported (https).\n
+      Bye.
+      `);
+      process.exit(1);
     }
 
-    this.deviceId = randomBytes(16).toString('hex');
-    this.deviceInformation = getDeviceObject(this.deviceId);
+    const { apiVersion, isReady } = dataInfoSystem;
+
     this.apiVersion = apiVersion;
     this.httpClients = {
       secure: createKyJointSpaceClient().extend({
         prefixUrl: `${this.apiUrls.secure}/${apiVersion}`,
-      }),
-      unsecure: createKyJointSpaceClient().extend({
-        prefixUrl: `${this.apiUrls.unsecure}/${apiVersion}`,
       }),
       digest: undefined,
     };
   }
 
   async startPairing() {
+    await this.init();
     const res = await this.httpClients?.secure
       .post('pair/request', {
         json: { device: this.deviceInformation, scope: ['read', 'write', 'control'] },
       })
       .json();
 
-    const { timestamp: authTimestamp, auth_key: authKey, timeout, error_id } = res as any;
+    const { timestamp: authTimestamp, auth_key: authKey, timeout, error_id, error_text } = res as any;
 
     if (error_id !== 'SUCCESS') {
-      throw new Error('Failed to start pairing');
+      consola.error(`
+      Failed to start pairing.\n
+      ${error_text}\n
+      Bye.
+      `);
+      process.exit(1);
     }
 
     this.startPairingResponse = {
@@ -96,14 +110,19 @@ export class PhilTVPairing {
       this.credentials.password,
     );
 
-    const promptForPin = async () => await promptText('Enter pin code?');
+    const promptForPin = async () =>
+      await consola.prompt('Enter pin code from TV:', {
+        type: 'text',
+      });
 
     return {
       promptForPin,
     };
   }
 
-  async completePairing(pin: string): Promise<CompletePairingResponse> {
+  async completePairing(pin: string) {
+    consola.start('Completing pairing...');
+
     if (this.startPairingResponse) {
       const decodedSecretKey = Buffer.from(JS_SECRET_KEY, 'base64');
       const authTimestamp = this.startPairingResponse?.authTimestamp + pin;
@@ -119,22 +138,20 @@ export class PhilTVPairing {
         },
       };
 
-      const res = await this.httpClients.digest?.post('pair/grant', {
+      const [errorGrant, dataGrant] = await tryit(this.httpClients.digest?.post as KyInstance['post'])('pair/grant', {
         json: authData,
         timeout: false,
         retry: 0,
-        throwHttpErrors: false,
       });
 
-      const response = (await res?.json()) as any;
+      if (errorGrant) {
+        return [errorGrant, undefined] as const;
+      }
+
+      const response = (await dataGrant?.json()) as any;
 
       if (response?.error_id !== 'SUCCESS') {
-        return {
-          config: undefined,
-          error: {
-            message: `Failed to complete pairing: ${response?.error_text}`,
-          },
-        };
+        return [new Error(`Failed to complete pairing: ${response?.error_text}`), undefined] as const;
       }
 
       const config = {
@@ -145,17 +162,9 @@ export class PhilTVPairing {
         fullApiUrl: `${this.apiUrls.secure}/${this.apiVersion}`,
       };
 
-      return {
-        config,
-        error: undefined,
-      };
+      return [undefined, config] as const;
     }
 
-    return {
-      config: undefined,
-      error: {
-        message: 'Failed to complete pairing',
-      },
-    };
+    return [new Error('Failed to complete pairing'), undefined] as const;
   }
 }

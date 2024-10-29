@@ -10,7 +10,7 @@ export function createKyJointSpaceClient() {
 export function createKyDigestClient(baseURL: string, username: string, password: string) {
   const digestClient = new DigestClient(username, password);
 
-  return createKyJointSpaceClient().extend({
+  return ky.create({
     throwHttpErrors: true,
     prefixUrl: baseURL,
     hooks: {

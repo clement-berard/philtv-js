@@ -21,6 +21,7 @@
     "build": "pnpm tsup --dts --clean --minify --format esm src/index.ts"
   },
   "dependencies": {
+    "consola": "3.2.3",
     "digest-fetch": "3.1.1",
     "ky": "1.7.2",
     "node-fetch": "3.3.2",
@@ -29,9 +30,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "22.7.8",
+    "@types/node": "22.8.2",
     "tsup": "8.3.5",
-    "tsx": "4.19.1",
+    "tsx": "4.19.2",
     "typedoc": "^0.26.10",
     "typedoc-plugin-markdown": "^4.2.9",
     "typedoc-vitepress-theme": "1.0.2",
