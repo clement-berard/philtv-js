@@ -11,6 +11,7 @@ export function createKyDigestClient(baseURL: string, username: string, password
   const digestClient = new DigestClient(username, password);
 
   return createKyJointSpaceClient().extend({
+    throwHttpErrors: true,
     prefixUrl: baseURL,
     hooks: {
       beforeRequest: [

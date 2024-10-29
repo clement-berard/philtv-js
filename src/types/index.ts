@@ -5,6 +5,12 @@ export type PhilTVPairingParams = {
   apiPort: number;
 };
 
+export type PhilTVApiParams = {
+  apiUrl: string;
+  user: string;
+  password: string;
+};
+
 export type HttpClients = {
   unsecure?: KyInstance;
   secure: KyInstance;
@@ -28,3 +34,11 @@ export type CompletePairingResponse =
         fullApiUrl: string;
       };
     };
+
+export type FlatNode = {
+  node_id: number;
+  type: string;
+  string_id?: string;
+  context?: string;
+  data?: any;
+};
