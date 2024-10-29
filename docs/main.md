@@ -31,15 +31,12 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // Disable TLS certificate verific
 
 const pjs = new PhilTVPairing({ tvIp: '192.168.0.22', apiPort: 1926 });
 
-// you must to call init() before startPairing(), to check if the TV is reachable and compatible
-await pjs.init();
-
 // `startPairing` returns a function to prompt for the pin, can be useful
 const { promptForPin } = await pjs.startPairing();
 const pin = await promptForPin();
 
 // `completePairing` returns the configuration object, or an error
-const { config, error } = await pjs.completePairing(pin);
+const [error, config] = await pjs.completePairing(pin);
 
 if (!error) {
   console.log('Pairing successful:', config);
@@ -54,7 +51,7 @@ Result example of `config`:
   "password": "5bewertrewref6968be556667552a49da5bf5fce3b379127cf74af2a3951026c2b",
   "apiUrl": "https://192.168.0.22:1926",
   "apiVersion": 6,
-  "fullApiUrl": "https://10.0.0.19:1926/6"
+  "fullApiUrl": "https://192.168.0.22:1926/6"
 }
 ```
 You can store the `user` and `password` in a secure location and use them to interact with your TV.
@@ -74,7 +71,7 @@ You must have the `user` and `password` from the pairing process to use the Join
 
 ```typescript
 const apiClient = new PhilTVApi({
-  apiUrl: 'https://10.0.0.19:1926/6',
+  apiUrl: 'https://192.168.0.22:1926/6',
   password: '5bewertrewref6968be556667552a49da5bf5fce3b379127cf74af2a3951026c2b',
   user: 'd1443b9fdeecd187277as5464564565e6315',
 });

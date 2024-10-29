@@ -1,3 +1,3 @@
-export { PhilTVPairing } from './lib/pairing';
-export { PhilTVApi } from './lib/tv-api';
+export { PhilTVPairing } from './lib/PhilTVPairing';
+export { PhilTVApi } from './lib/PhilTVApi';
 export type * from './types';
