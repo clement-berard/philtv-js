@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   # Build job
-  build:
+  static-checks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
