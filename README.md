@@ -4,6 +4,7 @@
 
 This library leverages the lightweight [ky](https://github.com/sindresorhus/ky) HTTP client, which is built on top of Fetch API, for making secure and intuitive HTTP requests.
 
+**Works only in secure environments (HTTPS) and with versions 6 of the JointSpace protocol.**
 
 ## Table of Contents
 

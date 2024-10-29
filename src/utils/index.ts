@@ -1,6 +1,8 @@
 import { createHmac } from 'node:crypto';
 import { stdin as input, stdout as output } from 'node:process';
 import readline from 'node:readline/promises';
+import { omit } from 'radash';
+import type { FlatNode } from '../types';
 
 export function createSignature(secretKey: Buffer, secret: string) {
   const hmac = createHmac('sha1', secretKey);
@@ -26,4 +28,23 @@ export function getDeviceObject(deviceId: string) {
     app_name: 'PhilTV-js APP',
     type: 'native',
   };
+}
+
+export function getFlattenNodes(allInput: any) {
+  const result: FlatNode[] = [];
+
+  function flattenNodes(node: any) {
+    const { node_id, type, string_id, context, data } = node;
+    result.push({ node_id, type, string_id, context, data: omit(data, ['nodes']) });
+
+    if (data?.nodes) {
+      for (const childNode of data.nodes) {
+        flattenNodes(childNode);
+      }
+    }
+  }
+
+  flattenNodes(allInput);
+
+  return result;
 }
