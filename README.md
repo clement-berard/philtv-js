@@ -6,53 +6,6 @@ This library leverages the lightweight [ky](https://github.com/sindresorhus/ky) 
 
 **Works only in secure environments (HTTPS) and with versions 6 of the JointSpace protocol.**
 
-## Table of Contents
+# Documentation
 
-- [Installation](#installation)
-- [Usage](#usage)
-
-## Installation
-
-To install `philtv-js`, you can use npm:
-
-```bash
-npm install philtv-js
-```
-## Usage
-To use philtv-js, you need to import the PhilTVPairing class from the library:
-
-```typescript
-import { PhilTVPairing } from 'philtv-js';
-
-// @ts-ignore
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // Disable TLS certificate verification
-
-const pjs = new PhilTVPairing({ tvIp: '192.168.0.22', apiPort: 1926 });
-await pjs.init();
-const { promptForPin } = await pjs.startPairing();
-const pin = (await promptForPin()) as string;
-const { config, error } = await pjs.completePairing(pin);
-
-if (!error) {
-  console.log('Pairing successful:', config);
-} else {
-  console.error('Error:', error.message);
-}
-```
-Result of `config`:
-```json
-{
-  "user": "d1443b9fdeecd187277as5464564565e6315",
-  "password": "5bewertrewref6968be556667552a49da5bf5fce3b379127cf74af2a3951026c2b",
-  "apiUrl": "https://192.168.0.22:1926",
-  "apiVersion": 6,
-  "fullApiUrl": "https://10.0.0.19:1926/6"
-}
-```
-You can store the `user` and `password` in a secure location and use them to interact with your TV.
-
-### Warning
-Usage of `NODE_TLS_REJECT_UNAUTHORIZED`:
-Setting `NODE_TLS_REJECT_UNAUTHORIZED = 0` disables TLS certificate verification, which can expose your application to "man-in-the-middle" attacks. Use it with caution and only in development environments.
-
-For more information on managing TLS certificates, refer to the Node.js documentation.
+You can find the full documentation [here](https://clement-berard.github.io/philtv-js).

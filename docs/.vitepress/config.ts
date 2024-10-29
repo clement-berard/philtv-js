@@ -8,8 +8,8 @@ export default defineConfig({
   base: process.env.CI ? '/philtv-js/' : '/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    nav: [{ text: 'Home', link: '../lib/index.md' }],
-    sidebar: [{ text: 'Get Started', link: '/lib/index.md' }, ...SideBarMenuAutoGen],
+    nav: [{ text: 'Home', link: '../main.md' }],
+    sidebar: [{ text: 'Get Started', link: '/main.md' }, ...SideBarMenuAutoGen],
     socialLinks: [{ icon: 'github', link: 'https://github.com/clement-berard/philtv-js' }],
   },
 });
