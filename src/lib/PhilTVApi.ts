@@ -1,95 +1,14 @@
-import type { KyInstance } from 'ky';
 import { tryit } from 'radash';
-import { createKyDigestClient } from '../http-clients';
-import type { FlatNode, PhilTVApiParams } from '../types';
 import type { InputKeys } from '../types/jointspace';
-import { getFlattenNodes } from '../utils';
+import { PhilTVApiBase } from './PhilTVApiBase';
 
-export class PhilTVApi {
-  private readonly digestClient: KyInstance;
-
-  constructor(params: PhilTVApiParams) {
-    this.digestClient = createKyDigestClient(params.apiUrl, params.user, params.password);
-  }
-
-  getDigestClient() {
-    return this.digestClient;
-  }
-
+export class PhilTVApi extends PhilTVApiBase {
   getSystem() {
     return tryit(this.digestClient.get('system').json)();
   }
 
-  async getMenuStructure(opts: { flat?: boolean } = { flat: false }) {
-    const [errorRaw, rawStructure] = await tryit<any[], any>(
-      this.digestClient.get('menuitems/settings/structure').json,
-    )();
-    if (errorRaw) {
-      return [errorRaw, undefined];
-    }
-
-    if (opts.flat) {
-      return [undefined, getFlattenNodes(rawStructure.node)];
-    }
-
-    return [undefined, rawStructure];
-  }
-
-  async getMenuStructureItems(context: string) {
-    const [errorFlatten, flattenStructure] = await this.getMenuStructure({ flat: true });
-
-    if (!errorFlatten) {
-      return [
-        undefined,
-        flattenStructure.find((node: any) => {
-          return String(node?.context).toLowerCase() === context;
-        }),
-      ] as [undefined, FlatNode];
-    }
-    return [errorFlatten, undefined] as [Error, undefined];
-  }
-
   getAmbilight() {
     return tryit(this.digestClient.get('ambilight/currentconfiguration').json)();
-  }
-
-  setMenuItemSetting(item: FlatNode | undefined, value: any) {
-    if (!item) {
-      return [new Error('Item not found'), undefined] as const;
-    }
-
-    const req = this.digestClient
-      .post('menuitems/settings/update', {
-        json: {
-          values: [
-            {
-              value: {
-                Nodeid: item.node_id,
-                data: {
-                  value: value,
-                },
-              },
-            },
-          ],
-        },
-      })
-      .then((resp) => {
-        return {
-          status: resp.status,
-          statusText: resp.statusText,
-          body: resp.body,
-          item,
-        };
-      });
-
-    return tryit(() => req)();
-  }
-
-  private async handleSetMenuItemSetting(contextName: string, value: unknown) {
-    const [errorGetStructureItem, item] = await this.getMenuStructureItems(contextName);
-    const [errorSetBrightness, result] = await this.setMenuItemSetting(item, value);
-
-    return [errorGetStructureItem || errorSetBrightness, result] as const;
   }
 
   async setAmbilightBrightness(brightness: number) {
@@ -129,7 +48,6 @@ export class PhilTVApi {
   }
 
   sendKey(key: InputKeys) {
-    // todo: enum for keys
     return this.digestClient.post('input/key', {
       json: { key: key },
     });
