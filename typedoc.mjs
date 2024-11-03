@@ -18,7 +18,7 @@ const config = {
                 "autoConfiguration": true,
                 "format": "vitepress",
                 "pretty": false,
-                "collapsed": false
+                "collapsed": true
         }
     }
 ;

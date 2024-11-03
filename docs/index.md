@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /main.md
+      link: /get-started.md
 
 features:
   - title: Modern stack

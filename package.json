@@ -14,6 +14,7 @@
   },
   "scripts": {
     "build": "pnpm tsup --dts --clean --minify --format esm src/index.ts",
+    "watch": "pnpm build --watch",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:generate": "pnpm typedoc:generate && pnpm docs:build",
@@ -28,7 +29,8 @@
     "digest-fetch": "3.1.1",
     "ky": "1.7.2",
     "node-fetch": "3.3.2",
-    "radash": "12.1.0"
+    "radash": "12.1.0",
+    "unstorage": "1.13.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -74,7 +76,10 @@
         "@semantic-release/commit-analyzer",
         {
           "releaseRules": [
-            { "type": "chore", "release": "patch" }
+            {
+              "type": "chore",
+              "release": "patch"
+            }
           ]
         }
       ],
