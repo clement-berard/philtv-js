@@ -60,7 +60,7 @@ export const AmbilightFollowVideoModeEnum = [
   'RELAX',
 ] as const;
 
-export type AmbilightFollowVideoMode = (typeof AmbilightFollowVideoModeEnum)[number];
+export type AmbilightFollowVideoMode = (typeof AmbilightFollowVideoModeEnum)[number] | string;
 
 export const AmbilightFollowAudioModeEnum = [
   'VU_METER',
