@@ -1,6 +1,4 @@
 import { createHmac } from 'node:crypto';
-import { stdin as input, stdout as output } from 'node:process';
-import readline from 'node:readline/promises';
 import { omit } from 'radash';
 import type { FlatNode } from '../types';
 
@@ -10,13 +8,6 @@ export function createSignature(secretKey: Buffer, secret: string) {
   hmac.end();
   // @ts-ignore
   return hmac.read('binary').toString('base64');
-}
-
-export async function promptText(question: string): Promise<string> {
-  const rl = readline.createInterface({ input, output });
-  const answer = await rl.question(`${question}: `);
-  rl.close();
-  return answer;
 }
 
 export function getDeviceObject(deviceId: string) {

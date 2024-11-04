@@ -33,6 +33,10 @@ export class PhilTVApiBase {
     return this.digestClient;
   }
 
+  protected renderResponse(error: Error | undefined, body: unknown | undefined) {
+    return [error, body] as const;
+  }
+
   /**
    * Retrieves the menu structure from the Philips TV API.
    *
@@ -96,9 +100,7 @@ export class PhilTVApiBase {
             {
               value: {
                 Nodeid: item.node_id,
-                data: {
-                  value: value,
-                },
+                data: value,
               },
             },
           ],
@@ -110,6 +112,7 @@ export class PhilTVApiBase {
           statusText: resp.statusText,
           body: resp.body,
           item,
+          originalResponse: resp,
         };
       });
 
@@ -119,6 +122,8 @@ export class PhilTVApiBase {
   protected async handleSetMenuItemSetting(contextName: string, value: unknown) {
     const [errorGetStructureItem, item] = await this.getMenuStructureItems(contextName);
     const [errorSetMenuItemSetting, result] = await this.setMenuItemSetting(item, value);
+    console.log('result', result);
+    console.log('errorSetMenuItemSetting', errorSetMenuItemSetting);
 
     return [errorGetStructureItem || errorSetMenuItemSetting, result] as const;
   }

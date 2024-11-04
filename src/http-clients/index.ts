@@ -1,12 +1,6 @@
 import DigestClient from 'digest-fetch';
 import ky from 'ky';
 
-export function createKyJointSpaceClient() {
-  return ky.create({
-    throwHttpErrors: false,
-  });
-}
-
 export function createKyDigestClient(baseURL: string, username: string, password: string) {
   const digestClient = new DigestClient(username, password);
 
