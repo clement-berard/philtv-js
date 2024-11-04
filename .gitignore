@@ -22,3 +22,4 @@ dist
 docs/.vitepress/cache
 docs/.vitepress/dist
 docs/lib
+.lib-cache

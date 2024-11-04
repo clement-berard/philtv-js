@@ -3,9 +3,9 @@ import { consola } from 'consola';
 import ky, { type KyInstance } from 'ky';
 import { tryit } from 'radash';
 import { JS_SECRET_KEY } from '../constants';
-import { createKyDigestClient, createKyJointSpaceClient } from '../http-clients';
+import { createKyDigestClient } from '../http-clients';
 import type { HttpClients, PhilTVPairingParams } from '../types';
-import { createSignature, getDeviceObject, promptText } from '../utils';
+import { createSignature, getDeviceObject } from '../utils';
 
 export async function getInformationSystem(httpClient: KyInstance) {
   const res = await httpClient.get('system').json();
@@ -67,8 +67,9 @@ export class PhilTVPairing {
 
     this.apiVersion = apiVersion;
     this.httpClients = {
-      secure: createKyJointSpaceClient().extend({
+      secure: ky.create({
         prefixUrl: `${this.apiUrls.secure}/${apiVersion}`,
+        throwHttpErrors: false,
       }),
       digest: undefined,
     };
@@ -122,6 +123,10 @@ export class PhilTVPairing {
 
   async completePairing(pin: string) {
     consola.start('Completing pairing...');
+
+    if (!pin) {
+      return [new Error('Failed to complete pairing'), undefined] as const;
+    }
 
     if (this.startPairingResponse) {
       const decodedSecretKey = Buffer.from(JS_SECRET_KEY, 'base64');
