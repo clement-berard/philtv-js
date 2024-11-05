@@ -122,8 +122,6 @@ export class PhilTVApiBase {
   protected async handleSetMenuItemSetting(contextName: string, value: unknown) {
     const [errorGetStructureItem, item] = await this.getMenuStructureItems(contextName);
     const [errorSetMenuItemSetting, result] = await this.setMenuItemSetting(item, value);
-    console.log('result', result);
-    console.log('errorSetMenuItemSetting', errorSetMenuItemSetting);
 
     return [errorGetStructureItem || errorSetMenuItemSetting, result] as const;
   }
