@@ -1,4 +1,4 @@
-import { tryit } from 'radash';
+import { get, tryit } from 'radash';
 import { z } from 'zod';
 import {
   type AmbilightFollowAudioMode,
@@ -22,6 +22,32 @@ export class PhilTVApi extends PhilTVApiBase {
     return this.handleSetMenuItemSetting('ambilight_brightness', {
       value: brightness,
     });
+  }
+
+  async changeAmbilightBrightness(move: 'increase' | 'decrease') {
+    const [, currentBrightness] = await this.getAmbilightBrightness();
+
+    const computedBrightness = move === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
+    const realBrightness = Math.min(10, Math.max(0, computedBrightness));
+
+    return this.setAmbilightBrightness(realBrightness);
+  }
+
+  async getAmbilightBrightness() {
+    const [errorGetStructureItem, item] = await this.getMenuStructureItems('ambilight_brightness');
+
+    if (errorGetStructureItem) {
+      return this.renderResponse(errorGetStructureItem, undefined);
+    }
+
+    const nodeId = item?.node_id;
+    const [errCurrentSetting, values] = await this.getCurrentSetting(nodeId);
+
+    if (errCurrentSetting) {
+      return this.renderResponse(errCurrentSetting, undefined);
+    }
+
+    return [undefined, Number(get(values, '0.value.data.value'))] as const;
   }
 
   protected async setAmbilightCurrentConfiguration(options: Record<any, any>) {
@@ -102,13 +128,22 @@ export class PhilTVApi extends PhilTVApiBase {
     return tryit(this.digestClient.get('HueLamp/power').json)();
   }
 
-  getCurrentSetting(nodeId: number) {
-    return tryit(
-      this.digestClient.post('menuitems/settings/current', {
+  async getCurrentSetting(nodeId: number) {
+    const node: any = await this.digestClient
+      .post('menuitems/settings/current', {
         json: {
           nodes: [{ nodeid: nodeId }],
         },
-      }).json,
-    )();
+      })
+      .json();
+
+    const values = node?.values as any[];
+    const hasValues = values?.length > 0;
+
+    if (hasValues) {
+      return [undefined, values] as const;
+    }
+
+    return [new Error('menuitems/settings/current: No values'), undefined] as const;
   }
 }
