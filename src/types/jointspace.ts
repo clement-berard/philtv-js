@@ -51,25 +51,25 @@ export const InputKeys = [
 export type InputKeys = (typeof InputKeys)[number];
 
 export const AmbilightFollowVideoModeEnum = [
-  'STANDARD',
-  'NATURAL',
-  'IMMERSIVE',
-  'VIVID',
-  'GAME',
   'COMFORT',
+  'GAME',
+  'IMMERSIVE',
+  'NATURAL',
   'RELAX',
+  'STANDARD',
+  'VIVID',
 ] as const;
 
 export type AmbilightFollowVideoMode = (typeof AmbilightFollowVideoModeEnum)[number] | string;
 
 export const AmbilightFollowAudioModeEnum = [
-  'VU_METER',
   'ENERGY_ADAPTIVE_BRIGHTNESS',
   'ENERGY_ADAPTIVE_COLORS',
-  'SPECTRUM_ANALYSER',
   'KNIGHT_RIDER_ALTERNATING',
-  'RANDOM_PIXEL_FLASH',
   'MODE_RANDOM',
+  'RANDOM_PIXEL_FLASH',
+  'SPECTRUM_ANALYSER',
+  'VU_METER',
 ] as const;
 
 export type AmbilightFollowAudioMode = (typeof AmbilightFollowAudioModeEnum)[number];

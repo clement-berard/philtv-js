@@ -2,7 +2,6 @@ import { randomBytes } from 'node:crypto';
 import { consola } from 'consola';
 import { JS_SECRET_KEY } from '../constants';
 import { getHttpClient, getHttpDigestClient } from '../http-clients';
-import type { HttpClients, PhilTVPairingParams } from '../types';
 import { createSignature, getDeviceObject } from '../utils';
 
 export async function getInformationSystem(apiUrl: string) {
@@ -26,12 +25,26 @@ export async function getInformationSystem(apiUrl: string) {
   };
 }
 
+export type PhilTVPairingParams = {
+  /**
+   * The IP address of the Philips TV to connect to.
+   * Without the protocol and port number.
+   * @example 192.168.1.2
+   */
+  tvIp: string;
+  /**
+   * The port number of the Philips TV API to connect to.
+   * Default is `1926`.
+   */
+  apiPort?: number;
+};
+
 export class PhilTVPairing {
   private tvBase: PhilTVPairingParams;
   private deviceId!: string;
   private apiUrls: { secure: string };
   private deviceInformation!: ReturnType<typeof getDeviceObject>;
-  private httpClients!: HttpClients;
+  private httpClients!: { digest?: ReturnType<typeof getHttpDigestClient> };
   private startPairingResponse!: { authKey: any; authTimestamp: any; timeout: any };
   private credentials!: { password: any; user: string | undefined };
   private apiVersion!: number;
@@ -39,7 +52,7 @@ export class PhilTVPairing {
   constructor(initParams: PhilTVPairingParams) {
     this.tvBase = initParams;
     this.apiUrls = {
-      secure: `https://${this.tvBase.tvIp}:${this.tvBase.apiPort}`,
+      secure: `https://${this.tvBase.tvIp}:${this.tvBase.apiPort || 1926}`,
     };
     this.deviceId = randomBytes(16).toString('hex');
     this.deviceInformation = getDeviceObject(this.deviceId);

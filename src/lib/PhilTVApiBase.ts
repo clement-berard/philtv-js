@@ -7,7 +7,6 @@ import { getFlattenNodes } from '../utils';
  */
 export class PhilTVApiBase {
   protected digestClient: ReturnType<typeof getHttpDigestClient>;
-  protected instanceOptions: PhilTVApiParams['options'];
 
   constructor(params: PhilTVApiParams) {
     this.digestClient = getHttpDigestClient({
@@ -15,7 +14,6 @@ export class PhilTVApiBase {
       password: params.password,
       baseUrl: params.apiUrl,
     });
-    this.instanceOptions = params.options;
   }
 
   /**

@@ -1,10 +1,5 @@
 import type { getHttpDigestClient } from '../http-clients';
 
-export type PhilTVPairingParams = {
-  tvIp: string;
-  apiPort: number;
-};
-
 /**
  * Parameters required to initialize the `PhilTVApiBase` class.
  *
@@ -27,10 +22,6 @@ export type PhilTVApiParams = {
    * The password for authentication with the API.
    */
   password: string;
-};
-
-export type HttpClients = {
-  digest?: ReturnType<typeof getHttpDigestClient>;
 };
 
 export type FlatNode = {
