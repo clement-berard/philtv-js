@@ -1,14 +1,15 @@
 import { randomBytes } from 'node:crypto';
 import { consola } from 'consola';
-import ky, { type KyInstance } from 'ky';
-import { tryit } from 'radash';
 import { JS_SECRET_KEY } from '../constants';
-import { createKyDigestClient } from '../http-clients';
+import { getHttpClient, getHttpDigestClient } from '../http-clients';
 import type { HttpClients, PhilTVPairingParams } from '../types';
 import { createSignature, getDeviceObject } from '../utils';
 
-export async function getInformationSystem(httpClient: KyInstance) {
-  const res = await httpClient.get('system').json();
+export async function getInformationSystem(apiUrl: string) {
+  const client = getHttpClient();
+  const { data: res } = await client.request(`${apiUrl}/system`, {
+    dataType: 'json',
+  });
   const {
     api_version: { Major: apiVersion },
     featuring: { systemfeatures: systemFeatures },
@@ -45,16 +46,10 @@ export class PhilTVPairing {
   }
 
   private async init() {
-    const [errGetInfoSystem, dataInfoSystem] = await tryit(getInformationSystem)(
-      ky.create({
-        prefixUrl: this.apiUrls.secure,
-      }),
-    );
+    const dataInfoSystem = await getInformationSystem(this.apiUrls.secure);
 
-    if (errGetInfoSystem) {
+    if (!dataInfoSystem.isReady) {
       consola.error(`
-      ${errGetInfoSystem.message}\n
-      ${errGetInfoSystem.cause}\n
       Check if the TV is on and the IP is correct.
       Only Philips TVs with API version 6 or higher are supported.
       Only secure transport and digest auth pairing are supported (https).\n
@@ -66,22 +61,19 @@ export class PhilTVPairing {
     const { apiVersion, isReady } = dataInfoSystem;
 
     this.apiVersion = apiVersion;
-    this.httpClients = {
-      secure: ky.create({
-        prefixUrl: `${this.apiUrls.secure}/${apiVersion}`,
-        throwHttpErrors: false,
-      }),
-      digest: undefined,
-    };
   }
 
   async startPairing() {
     await this.init();
-    const res = await this.httpClients?.secure
-      .post('pair/request', {
-        json: { device: this.deviceInformation, scope: ['read', 'write', 'control'] },
-      })
-      .json();
+    const client = getHttpClient();
+    const { data: res } = await client.request(`${this.apiUrls.secure}/${this.apiVersion}/pair/request`, {
+      method: 'POST',
+      data: {
+        device: this.deviceInformation,
+        scope: ['read', 'write', 'control'],
+      },
+      dataType: 'json',
+    });
 
     const { timestamp: authTimestamp, auth_key: authKey, timeout, error_id, error_text } = res as any;
 
@@ -105,11 +97,11 @@ export class PhilTVPairing {
       password: authKey,
     };
 
-    this.httpClients.digest = createKyDigestClient(
-      `${this.apiUrls.secure}/${this.apiVersion}`,
-      this.credentials.user as string,
-      this.credentials.password,
-    );
+    this.httpClients.digest = getHttpDigestClient({
+      user: this.credentials.user as string,
+      password: this.credentials.password,
+      baseUrl: `${this.apiUrls.secure}/${this.apiVersion}`,
+    });
 
     const promptForPin = async () =>
       await consola.prompt('Enter pin code from TV:', {
@@ -143,9 +135,13 @@ export class PhilTVPairing {
         },
       };
 
-      const [errorGrant, dataGrant] = await tryit(this.httpClients.digest?.post as KyInstance['post'])('pair/grant', {
-        json: authData,
-        timeout: false,
+      if (!this.httpClients.digest) {
+        return [new Error('No digest client'), undefined] as const;
+      }
+
+      const [errorGrant, dataGrant] = await this.httpClients.digest.request('pair/grant', {
+        method: 'POST',
+        data: authData,
         retry: 0,
       });
 
@@ -153,10 +149,8 @@ export class PhilTVPairing {
         return [errorGrant, undefined] as const;
       }
 
-      const response = (await dataGrant?.json()) as any;
-
-      if (response?.error_id !== 'SUCCESS') {
-        return [new Error(`Failed to complete pairing: ${response?.error_text}`), undefined] as const;
+      if (dataGrant?.error_id !== 'SUCCESS') {
+        return [new Error(`Failed to complete pairing: ${dataGrant?.error_text}`), undefined] as const;
       }
 
       const config = {
