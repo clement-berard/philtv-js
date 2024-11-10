@@ -14,10 +14,14 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./constants": {
+      "import": "./dist/constants.js",
+      "require": "./dist/constants.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pnpm tsup --dts --clean --minify --format esm,cjs src/index.ts",
+    "build": "tsup",
     "watch": "pnpm build --watch",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",

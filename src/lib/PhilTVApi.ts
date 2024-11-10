@@ -10,8 +10,16 @@ import {
 import { PhilTVApiBase } from './PhilTVApiBase';
 
 export class PhilTVApi extends PhilTVApiBase {
-  getSystem() {
-    return this.digestClient.request('system');
+  async getSystem() {
+    const [err, data, resp] = await this.digestClient.request('system');
+
+    return [
+      err,
+      {
+        ...data,
+        fullApiVersion: `${data.api_version.Major}.${data.api_version.Minor}.${data.api_version.Patch}`,
+      },
+    ] as const;
   }
 
   async setAmbilightBrightness(brightness: number) {
@@ -61,23 +69,35 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async getAmbilightFullInformation() {
-    const [getAmbilightConfiguration, getAmbilightBrightnessInformation, getAmbilightMode] = await Promise.all([
+    const [
+      getAmbilightConfiguration,
+      getAmbilightBrightnessInformation,
+      getAmbilightMode,
+      getAmbilightCached,
+      getAmbiHue,
+    ] = await Promise.all([
       this.getAmbilightConfiguration(),
       this.getAmbilightBrightnessInformation(),
       this.getAmbilightMode(),
+      this.getAmbilightCached(),
+      this.getAmbiHue(),
     ]);
 
     const [err1, ambilightConfiguration] = getAmbilightConfiguration;
     const [err2, ambilightBrightnessInformation] = getAmbilightBrightnessInformation;
     const [err3, ambilightMode] = getAmbilightMode;
+    const [err4, ambilightCached] = getAmbilightCached;
+    const [err5, ambiHue] = getAmbiHue;
 
     const result = {
       configuration: ambilightConfiguration,
       mode: ambilightMode,
       brightness: ambilightBrightnessInformation,
+      cached: ambilightCached,
+      ambiHue,
     };
 
-    return [err1 || err2 || err3, result] as const;
+    return [err1 || err2 || err3 || err4, result] as const;
   }
 
   protected async setAmbilightCurrentConfiguration(options: Record<any, any>) {
