@@ -8,6 +8,7 @@ import {
   type InputKeys,
 } from '../types/jointspace';
 import { PhilTVApiBase } from './PhilTVApiBase';
+import { SetBrightnessParams, setBrightnessParamsSchema } from './api/validation';
 
 export class PhilTVApi extends PhilTVApiBase {
   async getSystem() {
@@ -28,13 +29,34 @@ export class PhilTVApi extends PhilTVApiBase {
     });
   }
 
-  async changeAmbilightBrightness(move: 'increase' | 'decrease') {
-    const [, currentBrightness] = await this.getAmbilightBrightnessInformation();
+  async changeAmbilightBrightness(move: string | number) {
+    const [, currentBrightness] = await this.getAmbilightBrightnessValue();
 
-    const computedBrightness = move === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
-    const realBrightness = Math.min(10, Math.max(0, computedBrightness));
+    const realValue = Number.isNaN(Number(move)) ? move : Number(move);
 
-    return this.setAmbilightBrightness(realBrightness);
+    const isValid = setBrightnessParamsSchema.safeParse(realValue);
+
+    if (!isValid.success) {
+      return this.renderResponse(isValid.error, undefined);
+    }
+
+    if (typeof realValue === 'string') {
+      const computedBrightness =
+        realValue === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
+      const realBrightness = Math.min(10, Math.max(0, computedBrightness));
+
+      return this.setAmbilightBrightness(realBrightness);
+    }
+
+    return this.setAmbilightBrightness(realValue);
+  }
+
+  increaseAmbilightBrightness() {
+    return this.changeAmbilightBrightness('increase');
+  }
+
+  decreaseAmbilightBrightness() {
+    return this.changeAmbilightBrightness('decrease');
   }
 
   getAmbilightConfiguration() {
@@ -97,7 +119,7 @@ export class PhilTVApi extends PhilTVApiBase {
       ambiHue,
     };
 
-    return [err1 || err2 || err3 || err4, result] as const;
+    return [err1 || err2 || err3 || err4 || err5, result] as const;
   }
 
   protected async setAmbilightCurrentConfiguration(options: Record<any, any>) {
