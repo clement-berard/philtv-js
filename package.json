@@ -9,6 +9,10 @@
   "engines": {
     "node": ">=18"
   },
+  "bin": {
+    "philtv-js-pairing": "./dist/bin/pairing.cjs",
+    "philtv-js": "./dist/pairing.cjs"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -17,14 +21,6 @@
     "./constants": {
       "import": "./dist/constants.js",
       "require": "./dist/constants.cjs"
-    },
-    "./api": {
-      "import": "./dist/api.js",
-      "require": "./dist/api.cjs"
-    },
-    "./pairing": {
-      "import": "./dist/pairing.js",
-      "require": "./dist/pairing.cjs"
     },
     "./utils": {
       "import": "./dist/utils.js",
@@ -46,6 +42,7 @@
   },
   "dependencies": {
     "consola": "3.2.3",
+    "figlet": "1.8.0",
     "radash": "12.1.0",
     "urllib": "4.4.0",
     "zod": "3.23.8"

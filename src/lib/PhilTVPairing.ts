@@ -7,23 +7,32 @@ import { createSignature } from '../utils/server';
 
 export async function getInformationSystem(apiUrl: string) {
   const client = getHttpClient();
-  const { data: res } = await client.request(`${apiUrl}/system`, {
-    dataType: 'json',
-  });
-  const {
-    api_version: { Major: apiVersion },
-    featuring: { systemfeatures: systemFeatures },
-  } = res as Record<string, any>;
-  const isSecureTransport = systemFeatures.secured_transport === 'true';
-  const isGoodPairingType = systemFeatures.pairing_type === 'digest_auth_pairing';
-  const isReady = isSecureTransport && isGoodPairingType;
-  return {
-    apiVersion,
-    systemFeatures,
-    isSecureTransport,
-    isGoodPairingType,
-    isReady,
-  };
+  try {
+    const { data: res } = await client.request(`${apiUrl}/system`, {
+      dataType: 'json',
+      timeout: 2000,
+      signal: AbortSignal.timeout(2000),
+    });
+    const {
+      api_version: { Major: apiVersion },
+      featuring: { systemfeatures: systemFeatures },
+    } = res as Record<string, any>;
+    const isSecureTransport = systemFeatures.secured_transport === 'true';
+    const isGoodPairingType = systemFeatures.pairing_type === 'digest_auth_pairing';
+    const isReady = isSecureTransport && isGoodPairingType;
+    return [
+      undefined,
+      {
+        apiVersion,
+        systemFeatures,
+        isSecureTransport,
+        isGoodPairingType,
+        isReady,
+      },
+    ] as const;
+  } catch (e) {
+    return [e as Error, undefined] as const;
+  }
 }
 
 export type PhilTVPairingParams = {
@@ -60,21 +69,26 @@ export class PhilTVPairing {
   }
 
   private async init() {
-    const dataInfoSystem = await getInformationSystem(this.apiUrls.secure);
+    const [errGetSystem, dataInfoSystem] = await getInformationSystem(this.apiUrls.secure);
 
-    if (!dataInfoSystem.isReady) {
+    if (errGetSystem || (dataInfoSystem && !dataInfoSystem.isReady)) {
       consola.error(`
       Check if the TV is on and the IP is correct.
       Only Philips TVs with API version 6 or higher are supported.
       Only secure transport and digest auth pairing are supported (https).\n
+     
+      ${errGetSystem ? errGetSystem?.message : ''}
+     
       Bye.
       `);
       process.exit(1);
     }
 
-    const { apiVersion, isReady } = dataInfoSystem;
+    if (dataInfoSystem) {
+      const { apiVersion, isReady } = dataInfoSystem;
 
-    this.apiVersion = apiVersion;
+      this.apiVersion = apiVersion;
+    }
   }
 
   async startPairing() {
@@ -111,11 +125,13 @@ export class PhilTVPairing {
       password: authKey,
     };
 
-    this.httpClients.digest = getHttpDigestClient({
-      user: this.credentials.user as string,
-      password: this.credentials.password,
-      baseUrl: `${this.apiUrls.secure}/${this.apiVersion}`,
-    });
+    this.httpClients = {
+      digest: getHttpDigestClient({
+        user: this.credentials.user as string,
+        password: this.credentials.password,
+        baseUrl: `${this.apiUrls.secure}/${this.apiVersion}`,
+      }),
+    };
 
     const promptForPin = async () =>
       await consola.prompt('Enter pin code from TV:', {
