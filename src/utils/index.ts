@@ -1,14 +1,6 @@
-import { createHmac } from 'node:crypto';
 import { omit } from 'radash';
+import { getHttpClient } from '../http-clients';
 import type { FlatNode } from '../types';
-
-export function createSignature(secretKey: Buffer, secret: string) {
-  const hmac = createHmac('sha1', secretKey);
-  hmac.write(secret);
-  hmac.end();
-  // @ts-ignore
-  return hmac.read('binary').toString('base64');
-}
 
 export function getDeviceObject(deviceId: string) {
   return {
@@ -38,4 +30,15 @@ export function getFlattenNodes(allInput: any) {
   flattenNodes(allInput);
 
   return result;
+}
+
+export async function checkUrl(url: string) {
+  const client = getHttpClient();
+  try {
+    await client.request(url, { method: 'GET', timeout: 1000 });
+
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

@@ -1,75 +1,11 @@
-export const InputKeys = [
-  'Adjust',
-  'AmbilightOnOff',
-  'Back',
-  'BlueColour',
-  'ChannelStepDown',
-  'ChannelStepUp',
-  'Confirm',
-  'CursorDown',
-  'CursorLeft',
-  'CursorRight',
-  'CursorUp',
-  'Digit0',
-  'Digit1',
-  'Digit2',
-  'Digit3',
-  'Digit4',
-  'Digit5',
-  'Digit6',
-  'Digit7',
-  'Digit8',
-  'Digit9',
-  'Dot',
-  'FastForward',
-  'Find',
-  'GreenColour',
-  'Home',
-  'Info',
-  'Mute',
-  'Next',
-  'Online',
-  'Options',
-  'Pause',
-  'PlayPause',
-  'Previous',
-  'Record',
-  'RedColour',
-  'Rewind',
-  'Source',
-  'Standby',
-  'Stop',
-  'Subtitle',
-  'Teletext',
-  'Viewmode',
-  'VolumeDown',
-  'VolumeUp',
-  'WatchTV',
-  'YellowColour',
-] as const;
+import type { JOINTSPACE_CONSTANTS } from '../constants';
 
-export type InputKeys = (typeof InputKeys)[number];
+export type InputKeys = (typeof JOINTSPACE_CONSTANTS.inputKeys)[number];
 
-export const AmbilightFollowVideoModeEnum = [
-  'STANDARD',
-  'NATURAL',
-  'IMMERSIVE',
-  'VIVID',
-  'GAME',
-  'COMFORT',
-  'RELAX',
-] as const;
+export type AmbilightFollowVideoMode = (typeof JOINTSPACE_CONSTANTS.ambilight.followVideoMode)[number] | string;
 
-export type AmbilightFollowVideoMode = (typeof AmbilightFollowVideoModeEnum)[number] | string;
+export type AmbilightFollowAudioMode = (typeof JOINTSPACE_CONSTANTS.ambilight.followAudioMode)[number];
 
-export const AmbilightFollowAudioModeEnum = [
-  'VU_METER',
-  'ENERGY_ADAPTIVE_BRIGHTNESS',
-  'ENERGY_ADAPTIVE_COLORS',
-  'SPECTRUM_ANALYSER',
-  'KNIGHT_RIDER_ALTERNATING',
-  'RANDOM_PIXEL_FLASH',
-  'MODE_RANDOM',
-] as const;
-
-export type AmbilightFollowAudioMode = (typeof AmbilightFollowAudioModeEnum)[number];
+export type AmbilightChangeBrightnessAvailableValues =
+  | (typeof JOINTSPACE_CONSTANTS.ambilight.brightnessAvailableValues)[number]
+  | string;

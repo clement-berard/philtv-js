@@ -5,10 +5,8 @@ To use `philtv-js`, you need to import the PhilTVPairing class from the library:
 ```typescript
 import { PhilTVPairing } from 'philtv-js';
 
-// @ts-ignore
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // Disable TLS certificate verification
-
-const pjs = new PhilTVPairing({ tvIp: '192.168.0.22', apiPort: 1926 });
+// instantiate the class with the TV's IP address. Default port is 1926
+const pjs = new PhilTVPairing({ tvIp: '192.168.0.22' });
 
 // `startPairing` returns a function to prompt for the pin, can be useful
 const { promptForPin } = await pjs.startPairing();
@@ -34,10 +32,3 @@ Result example of `config`:
 }
 ```
 You can store the `user` and `password` in a secure location and use them to interact with your TV.
-
-::: info
-Usage of `NODE_TLS_REJECT_UNAUTHORIZED`:
-Setting `NODE_TLS_REJECT_UNAUTHORIZED = 0` disables TLS certificate verification, which can expose your application to "man-in-the-middle" attacks. Use it with caution and only in development environments.
-
-For more information on managing TLS certificates, refer to the Node.js documentation.
-:::

@@ -1,27 +1,19 @@
-import type { KyInstance } from 'ky';
-import { get, tryit } from 'radash';
-import { createStorage } from 'unstorage';
-import fsLiteDriver from 'unstorage/drivers/fs-lite';
-import { createKyDigestClient } from '../http-clients';
+import { getHttpDigestClient } from '../http-clients';
 import type { FlatNode, PhilTVApiParams } from '../types';
 import { getFlattenNodes } from '../utils';
-
-function getStorage(storagePath: string) {
-  return createStorage({
-    driver: fsLiteDriver({ base: `./.lib-cache/${storagePath}` }),
-  });
-}
 
 /**
  * Class representing the base API for interacting with Philips TV.
  */
 export class PhilTVApiBase {
-  protected digestClient: KyInstance;
-  protected instanceOptions: PhilTVApiParams['options'];
+  protected digestClient: ReturnType<typeof getHttpDigestClient>;
 
   constructor(params: PhilTVApiParams) {
-    this.digestClient = createKyDigestClient(params.apiUrl, params.user, params.password);
-    this.instanceOptions = params.options;
+    this.digestClient = getHttpDigestClient({
+      user: params.user,
+      password: params.password,
+      baseUrl: params.apiUrl,
+    });
   }
 
   /**
@@ -37,90 +29,79 @@ export class PhilTVApiBase {
     return [error, body] as const;
   }
 
-  /**
-   * Retrieves the menu structure from the Philips TV API.
-   *
-   * @param opts - Options for the request.
-   * @param opts.flat - Whether to return the flattened structure. Default is false.
-   * @returns A promise that resolves to a tuple of error (if any) and the menu structure.
-   */
   async getMenuStructure(opts: { flat?: boolean } = { flat: false }) {
-    const cacheStructure = get<boolean | undefined>(this.instanceOptions, 'cacheStructure');
-    const storage = getStorage('');
-    if (cacheStructure) {
-      const existentCache = await storage.getItem('tv-structure:flat');
-      if (existentCache) {
-        return [undefined, existentCache];
-      }
-    }
-
-    const [errorRaw, rawStructure] = await tryit<any[], any>(
-      this.digestClient.get('menuitems/settings/structure').json,
-    )();
+    const [errorRaw, data, resp] = await this.digestClient.request('menuitems/settings/structure');
 
     if (errorRaw) {
       return [errorRaw, undefined];
     }
 
     if (opts.flat) {
-      const flatStructure = getFlattenNodes(rawStructure.node);
-      if (cacheStructure) {
-        await storage.set('tv-structure:flat', flatStructure);
-      }
+      const flatStructure = getFlattenNodes(data.node);
 
-      return [undefined, flatStructure];
+      return [undefined, flatStructure, resp];
     }
 
-    return [undefined, rawStructure];
+    return [undefined, data, resp];
   }
 
-  async getMenuStructureItems(context: string) {
+  async getMenuStructureItem(context: string | undefined, nodeId: number | undefined) {
     const [errorFlatten, flattenStructure] = await this.getMenuStructure({ flat: true });
+
+    const toFilterTerm = context ? 'context' : 'node_id';
+    const toFilterValue = context || nodeId;
 
     if (!errorFlatten) {
       return [
         undefined,
         flattenStructure.find((node: any) => {
-          return String(node?.context).toLowerCase() === context;
+          return node?.[toFilterTerm] === toFilterValue;
         }),
       ] as [undefined, FlatNode];
     }
     return [errorFlatten, undefined] as [Error, undefined];
   }
 
-  setMenuItemSetting(item: FlatNode | undefined, value: any) {
+  async getMenuStructureItemByContext(context: string) {
+    return this.getMenuStructureItem(context, undefined);
+  }
+
+  async getMenuStructureItemByNodeId(nodeId: number) {
+    return this.getMenuStructureItem(undefined, nodeId);
+  }
+
+  async setMenuItemSetting(item: FlatNode | undefined, value: any) {
     if (!item) {
       return [new Error('Item not found'), undefined] as const;
     }
 
-    const req = this.digestClient
-      .post('menuitems/settings/update', {
-        json: {
-          values: [
-            {
-              value: {
-                Nodeid: item.node_id,
-                data: value,
-              },
+    const [err, data, resp] = await this.digestClient.request('menuitems/settings/update', {
+      method: 'POST',
+      data: {
+        values: [
+          {
+            value: {
+              Nodeid: item.node_id,
+              data: value,
             },
-          ],
-        },
-      })
-      .then((resp) => {
-        return {
-          status: resp.status,
-          statusText: resp.statusText,
-          body: resp.body,
-          item,
-          originalResponse: resp,
-        };
-      });
+          },
+        ],
+      },
+    });
 
-    return tryit(() => req)();
+    const result = {
+      status: resp.status,
+      statusText: resp.statusText,
+      body: data,
+      item,
+      originalResponse: resp,
+    };
+
+    return [err, result] as const;
   }
 
   protected async handleSetMenuItemSetting(contextName: string, value: unknown) {
-    const [errorGetStructureItem, item] = await this.getMenuStructureItems(contextName);
+    const [errorGetStructureItem, item] = await this.getMenuStructureItemByContext(contextName);
     const [errorSetMenuItemSetting, result] = await this.setMenuItemSetting(item, value);
 
     return [errorGetStructureItem || errorSetMenuItemSetting, result] as const;

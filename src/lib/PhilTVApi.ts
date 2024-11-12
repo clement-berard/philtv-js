@@ -1,21 +1,20 @@
-import { get, tryit } from 'radash';
+import { get } from 'radash';
 import { z } from 'zod';
-import {
-  type AmbilightFollowAudioMode,
-  AmbilightFollowAudioModeEnum,
-  type AmbilightFollowVideoMode,
-  AmbilightFollowVideoModeEnum,
-  type InputKeys,
-} from '../types/jointspace';
+import { JOINTSPACE_CONSTANTS } from '../constants';
+import type { AmbilightFollowAudioMode, AmbilightFollowVideoMode, InputKeys } from '../types/jointspace';
 import { PhilTVApiBase } from './PhilTVApiBase';
 
 export class PhilTVApi extends PhilTVApiBase {
-  getSystem() {
-    return tryit(this.digestClient.get('system').json)();
-  }
+  async getSystem() {
+    const [err, data, resp] = await this.digestClient.request('system');
 
-  getAmbilightConfiguration() {
-    return tryit(this.digestClient.get('ambilight/currentconfiguration').json)();
+    return [
+      err,
+      {
+        ...data,
+        fullApiVersion: `${data.api_version.Major}.${data.api_version.Minor}.${data.api_version.Patch}`,
+      },
+    ] as const;
   }
 
   async setAmbilightBrightness(brightness: number) {
@@ -24,17 +23,42 @@ export class PhilTVApi extends PhilTVApiBase {
     });
   }
 
-  async changeAmbilightBrightness(move: 'increase' | 'decrease') {
-    const [, currentBrightness] = await this.getAmbilightBrightness();
+  async changeAmbilightBrightness(move: string | number) {
+    const [, currentBrightness] = await this.getAmbilightBrightnessValue();
 
-    const computedBrightness = move === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
-    const realBrightness = Math.min(10, Math.max(0, computedBrightness));
+    const realValue = (Number.isNaN(Number(move)) ? move : Number(move)) as any;
 
-    return this.setAmbilightBrightness(realBrightness);
+    const isValid = JOINTSPACE_CONSTANTS.ambilight.brightnessAvailableValues.includes(realValue);
+
+    if (!isValid) {
+      return this.renderResponse(new Error('Invalid value'), undefined);
+    }
+
+    if (typeof realValue === 'string') {
+      const computedBrightness =
+        realValue === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
+      const realBrightness = Math.min(10, Math.max(0, computedBrightness));
+
+      return this.setAmbilightBrightness(realBrightness);
+    }
+
+    return this.setAmbilightBrightness(realValue);
   }
 
-  async getAmbilightBrightness() {
-    const [errorGetStructureItem, item] = await this.getMenuStructureItems('ambilight_brightness');
+  increaseAmbilightBrightness() {
+    return this.changeAmbilightBrightness('increase');
+  }
+
+  decreaseAmbilightBrightness() {
+    return this.changeAmbilightBrightness('decrease');
+  }
+
+  getAmbilightConfiguration() {
+    return this.digestClient.request('ambilight/currentconfiguration');
+  }
+
+  async getAmbilightBrightnessInformation() {
+    const [errorGetStructureItem, item] = await this.getMenuStructureItemByContext('ambilight_brightness');
 
     if (errorGetStructureItem) {
       return this.renderResponse(errorGetStructureItem, undefined);
@@ -47,12 +71,55 @@ export class PhilTVApi extends PhilTVApiBase {
       return this.renderResponse(errCurrentSetting, undefined);
     }
 
-    return [undefined, Number(get(values, '0.value.data.value'))] as const;
+    return [undefined, get(values, '0.value', undefined)] as const;
+  }
+
+  async getAmbilightBrightnessValue() {
+    const [err, info] = await this.getAmbilightBrightnessInformation();
+
+    return [err, Number(get(info, 'data.value', undefined))] as const;
+  }
+
+  getAmbilightMode() {
+    return this.digestClient.request('ambilight/mode');
+  }
+
+  async getAmbilightFullInformation() {
+    const [
+      getAmbilightConfiguration,
+      getAmbilightBrightnessInformation,
+      getAmbilightMode,
+      getAmbilightCached,
+      getAmbiHue,
+    ] = await Promise.all([
+      this.getAmbilightConfiguration(),
+      this.getAmbilightBrightnessInformation(),
+      this.getAmbilightMode(),
+      this.getAmbilightCached(),
+      this.getAmbiHue(),
+    ]);
+
+    const [err1, ambilightConfiguration] = getAmbilightConfiguration;
+    const [err2, ambilightBrightnessInformation] = getAmbilightBrightnessInformation;
+    const [err3, ambilightMode] = getAmbilightMode;
+    const [err4, ambilightCached] = getAmbilightCached;
+    const [err5, ambiHue] = getAmbiHue;
+
+    const result = {
+      configuration: ambilightConfiguration,
+      mode: ambilightMode,
+      brightness: ambilightBrightnessInformation,
+      cached: ambilightCached,
+      ambiHue,
+    };
+
+    return [err1 || err2 || err3 || err4 || err5, result] as const;
   }
 
   protected async setAmbilightCurrentConfiguration(options: Record<any, any>) {
-    return tryit(this.digestClient.post)('ambilight/currentconfiguration', {
-      json: {
+    return this.digestClient.request('ambilight/currentconfiguration', {
+      method: 'POST',
+      data: {
         styleName: options?.styleName,
         isExpert: options?.isExpert ?? false,
         menuSetting: options?.menuSetting,
@@ -61,7 +128,7 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async setAmbilightFollowVideoMode(mode: AmbilightFollowVideoMode) {
-    const validator = z.enum(AmbilightFollowVideoModeEnum).safeParse(mode);
+    const validator = z.enum(JOINTSPACE_CONSTANTS.ambilight.followVideoMode).safeParse(mode);
 
     if (validator.error) {
       return this.renderResponse(validator.error, undefined);
@@ -74,7 +141,7 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async setAmbilightFollowAudioMode(mode: AmbilightFollowAudioMode) {
-    const validator = z.enum(AmbilightFollowAudioModeEnum).safeParse(mode);
+    const validator = z.enum(JOINTSPACE_CONSTANTS.ambilight.followAudioMode).safeParse(mode);
 
     if (validator.error) {
       return this.renderResponse(validator.error, undefined);
@@ -86,56 +153,45 @@ export class PhilTVApi extends PhilTVApiBase {
     });
   }
 
-  getAmbilightMode() {
-    return tryit(this.digestClient.get('ambilight/mode').json)();
-  }
-
   setAmbilightMode(mode: 'manual' | 'internal' | 'expert') {
-    return this.digestClient.post('ambilight/mode', {
-      json: {
+    return this.digestClient.request('ambilight/mode', {
+      method: 'POST',
+      data: {
         current: mode,
       },
     });
   }
 
   getAmbilightCached() {
-    return tryit(this.digestClient.get('ambilight/cached').json)();
-  }
-
-  getSource() {
-    return tryit(this.digestClient.get('sources/current').json)();
-  }
-
-  getChannels() {
-    return tryit(this.digestClient.get('channeldb/tv/channelLists/all').json)();
+    return this.digestClient.request('ambilight/cached');
   }
 
   getCurrentActivity() {
-    return tryit(this.digestClient.get('activities/current').json)();
+    return this.digestClient.request('activities/current');
   }
 
   getApplications() {
-    return tryit(this.digestClient.get('applications').json)();
+    return this.digestClient.request('applications');
   }
 
   sendKey(key: InputKeys) {
-    return this.digestClient.post('input/key', {
-      json: { key: key },
+    return this.digestClient.request('input/key', {
+      method: 'POST',
+      data: {
+        key: key,
+      },
     });
   }
 
   getAmbiHue() {
-    return tryit(this.digestClient.get('HueLamp/power').json)();
+    return this.digestClient.request('HueLamp/power');
   }
 
   async getCurrentSetting(nodeId: number) {
-    const node: any = await this.digestClient
-      .post('menuitems/settings/current', {
-        json: {
-          nodes: [{ nodeid: nodeId }],
-        },
-      })
-      .json();
+    const [, node] = await this.digestClient.request('menuitems/settings/current', {
+      method: 'POST',
+      data: { nodes: [{ nodeid: nodeId }] },
+    });
 
     const values = node?.values as any[];
     const hasValues = values?.length > 0;

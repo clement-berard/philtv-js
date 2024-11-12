@@ -2,18 +2,34 @@
   "name": "philtv-js",
   "version": "1.0.0",
   "description": "A simple library to pair and interact with Philips TV",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "engines": {
     "node": ">=18"
   },
+  "bin": {
+    "philtv-js-pairing": "./dist/bin/pairing.cjs",
+    "philtv-js": "./dist/pairing.cjs"
+  },
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./constants": {
+      "import": "./dist/constants.js",
+      "require": "./dist/constants.cjs"
+    },
+    "./utils": {
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pnpm tsup --dts --clean --minify --format esm src/index.ts",
+    "build": "tsup",
     "watch": "pnpm build --watch",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
@@ -26,11 +42,9 @@
   },
   "dependencies": {
     "consola": "3.2.3",
-    "digest-fetch": "3.1.1",
-    "ky": "1.7.2",
-    "node-fetch": "3.3.2",
+    "figlet": "1.8.0",
     "radash": "12.1.0",
-    "unstorage": "1.13.1",
+    "urllib": "4.4.0",
     "zod": "3.23.8"
   },
   "devDependencies": {
