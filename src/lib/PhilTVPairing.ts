@@ -2,7 +2,8 @@ import { randomBytes } from 'node:crypto';
 import { consola } from 'consola';
 import { JS_SECRET_KEY } from '../constants';
 import { getHttpClient, getHttpDigestClient } from '../http-clients';
-import { createSignature, getDeviceObject } from '../utils';
+import { getDeviceObject } from '../utils';
+import { createSignature } from '../utils/server';
 
 export async function getInformationSystem(apiUrl: string) {
   const client = getHttpClient();

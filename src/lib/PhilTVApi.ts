@@ -1,14 +1,8 @@
 import { get } from 'radash';
 import { z } from 'zod';
-import {
-  type AmbilightFollowAudioMode,
-  AmbilightFollowAudioModeEnum,
-  type AmbilightFollowVideoMode,
-  AmbilightFollowVideoModeEnum,
-  type InputKeys,
-} from '../types/jointspace';
+import { JOINTSPACE_CONSTANTS } from '../constants';
+import type { AmbilightFollowAudioMode, AmbilightFollowVideoMode, InputKeys } from '../types/jointspace';
 import { PhilTVApiBase } from './PhilTVApiBase';
-import { SetBrightnessParams, setBrightnessParamsSchema } from './api/validation';
 
 export class PhilTVApi extends PhilTVApiBase {
   async getSystem() {
@@ -32,12 +26,12 @@ export class PhilTVApi extends PhilTVApiBase {
   async changeAmbilightBrightness(move: string | number) {
     const [, currentBrightness] = await this.getAmbilightBrightnessValue();
 
-    const realValue = Number.isNaN(Number(move)) ? move : Number(move);
+    const realValue = (Number.isNaN(Number(move)) ? move : Number(move)) as any;
 
-    const isValid = setBrightnessParamsSchema.safeParse(realValue);
+    const isValid = JOINTSPACE_CONSTANTS.ambilight.brightnessAvailableValues.includes(realValue);
 
-    if (!isValid.success) {
-      return this.renderResponse(isValid.error, undefined);
+    if (!isValid) {
+      return this.renderResponse(new Error('Invalid value'), undefined);
     }
 
     if (typeof realValue === 'string') {
@@ -134,7 +128,7 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async setAmbilightFollowVideoMode(mode: AmbilightFollowVideoMode) {
-    const validator = z.enum(AmbilightFollowVideoModeEnum).safeParse(mode);
+    const validator = z.enum(JOINTSPACE_CONSTANTS.ambilight.followVideoMode).safeParse(mode);
 
     if (validator.error) {
       return this.renderResponse(validator.error, undefined);
@@ -147,7 +141,7 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async setAmbilightFollowAudioMode(mode: AmbilightFollowAudioMode) {
-    const validator = z.enum(AmbilightFollowAudioModeEnum).safeParse(mode);
+    const validator = z.enum(JOINTSPACE_CONSTANTS.ambilight.followAudioMode).safeParse(mode);
 
     if (validator.error) {
       return this.renderResponse(validator.error, undefined);

@@ -1,5 +1,3 @@
-import type { getHttpDigestClient } from '../http-clients';
-
 /**
  * Parameters required to initialize the `PhilTVApiBase` class.
  *
@@ -29,5 +27,7 @@ export type FlatNode = {
   type: string;
   string_id?: string;
   context?: string;
-  data?: any;
+  data?: unknown;
 };
+
+export type * from './jointspace';

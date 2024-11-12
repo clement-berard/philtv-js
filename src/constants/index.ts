@@ -1,8 +1,2 @@
 export const JS_SECRET_KEY = 'ZmVay1EQVFOaZhwQ4Kv81ypLAZNczV9sG4KkseXWn1NEk6cXmPKO/MCa9sryslvLCFMnNe4Z4CPXzToowvhHvA==';
-export {
-  InputKeys,
-  AmbilightFollowAudioModeEnum,
-  AmbilightFollowVideoModeEnum,
-  ambilightChangeBrightnessAvailableValues,
-  AmbilightChangeBrightnessAvailableValues,
-} from '../types/jointspace';
+export * from './jointspace';
