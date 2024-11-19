@@ -33,16 +33,16 @@ export class PhilTVApiBase {
     const [errorRaw, data, resp] = await this.digestClient.request('menuitems/settings/structure');
 
     if (errorRaw) {
-      return [errorRaw, undefined];
+      return [errorRaw, undefined] as const;
     }
 
     if (opts.flat) {
       const flatStructure = getFlattenNodes(data.node);
 
-      return [undefined, flatStructure, resp];
+      return [undefined, flatStructure, resp] as const;
     }
 
-    return [undefined, data, resp];
+    return [undefined, data, resp] as const;
   }
 
   async getMenuStructureItem(context: string | undefined, nodeId: number | undefined) {
@@ -90,8 +90,8 @@ export class PhilTVApiBase {
     });
 
     const result = {
-      status: resp.status,
-      statusText: resp.statusText,
+      status: resp?.status,
+      statusText: resp?.statusText,
       body: data,
       item,
       originalResponse: resp,
