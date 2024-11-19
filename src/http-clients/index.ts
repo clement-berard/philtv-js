@@ -13,24 +13,31 @@ type GetHttpDigestClient = {
 export async function handleRequest(url: string, baseUrl: string, client: HttpClient, reqOptions: RequestOptions = {}) {
   const fullUrl = `${baseUrl}/${url}`;
 
-  const resp = await client.request(fullUrl, reqOptions);
+  try {
+    const resp = await client.request(fullUrl, {
+      ...reqOptions,
+    });
 
-  const ok = resp.status >= 200 && resp.status < 300;
+    const ok = resp.status >= 200 && resp.status < 300;
 
-  if (!ok) {
-    return [new Error(`Request failed with status ${resp.status} (${resp.url})`), undefined, resp] as const;
+    if (!ok) {
+      return [new Error(`Request failed with status ${resp.status} (${resp.url})`), undefined, resp] as const;
+    }
+
+    const [errJsonParse, triedJson] = await tryit(JSON.parse)(resp.data.toString());
+    const realData = !errJsonParse ? triedJson : resp.data.toString();
+
+    return [undefined, realData, { ok, ...resp, data: realData }] as const;
+  } catch (error: unknown) {
+    return [error as Error, undefined, undefined] as const;
   }
-
-  const [errJsonParse, triedJson] = await tryit(JSON.parse)(resp.data.toString());
-  const realData = !errJsonParse ? triedJson : resp.data.toString();
-
-  return [undefined, realData, { ok, ...resp, data: realData }] as const;
 }
 
 export function getHttpDigestClient(config: GetHttpDigestClient) {
   const client = new HttpClient({
     connect: {
       rejectUnauthorized: config?.options?.rejectUnauthorized ?? false,
+      timeout: 1000,
     },
     defaultArgs: {
       digestAuth: `${config.user}:${config.password}`,
