@@ -1,6 +1,6 @@
 {
   "name": "philtv-js",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "A simple library to pair and interact with Philips TV",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
