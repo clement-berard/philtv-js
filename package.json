@@ -37,7 +37,9 @@
     "format": "pnpm biome format",
     "lint": "pnpm biome lint",
     "lint:check": "pnpm biome check",
-    "typedoc:generate": "typedoc"
+    "typedoc:generate": "typedoc",
+    "release": "pnpm release-it",
+    "release:test": "pnpm release-it --dry-run"
   },
   "dependencies": {
     "consola": "3.2.3",
@@ -49,7 +51,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@release-it/conventional-changelog": "9.0.3",
-    "@types/node": "22.8.7",
+    "@types/node": "22.9.1",
     "release-it": "17.10.0",
     "tsup": "8.3.5",
     "tsx": "4.19.2",
@@ -57,7 +59,7 @@
     "typedoc-plugin-markdown": "4.2.10",
     "typedoc-vitepress-theme": "1.0.2",
     "typescript": "5.6.3",
-    "vitepress": "1.4.5"
+    "vitepress": "1.5.0"
   },
   "keywords": [
     "ambilight",
@@ -78,5 +80,10 @@
   "homepage": "https://github.com/clement-berard/philtv-js#readme",
   "files": [
     "dist"
-  ]
+  ],
+  "pnpm": {
+    "overrides": {
+      "cross-spawn": "^7.0.5"
+    }
+  }
 }
