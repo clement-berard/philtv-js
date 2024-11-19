@@ -37,7 +37,9 @@
     "format": "pnpm biome format",
     "lint": "pnpm biome lint",
     "lint:check": "pnpm biome check",
-    "typedoc:generate": "typedoc"
+    "typedoc:generate": "typedoc",
+    "release": "pnpm release-it",
+    "release:test": "pnpm release-it --dry-run"
   },
   "dependencies": {
     "consola": "3.2.3",
