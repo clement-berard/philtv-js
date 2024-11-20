@@ -55,6 +55,7 @@ export function getHttpClient() {
   return new HttpClient({
     connect: {
       rejectUnauthorized: false,
+      timeout: 1000,
     },
     defaultArgs: {
       contentType: 'json',
