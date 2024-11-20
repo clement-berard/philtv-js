@@ -51,13 +51,14 @@ export type PhilTVPairingParams = {
 
 export class PhilTVPairing {
   private tvBase: PhilTVPairingParams;
-  private deviceId!: string;
-  private apiUrls: { secure: string };
-  private deviceInformation!: ReturnType<typeof getDeviceObject>;
+  readonly deviceId!: string;
+  readonly apiUrls: { secure: string };
+  readonly deviceInformation!: ReturnType<typeof getDeviceObject>;
   private httpClients!: { digest?: ReturnType<typeof getHttpDigestClient> };
   private startPairingResponse!: { authKey: any; authTimestamp: any; timeout: any };
   private credentials!: { password: any; user: string | undefined };
   private apiVersion!: number;
+  public pairingRequestUrl!: string;
 
   constructor(initParams: PhilTVPairingParams) {
     this.tvBase = initParams;
@@ -68,33 +69,20 @@ export class PhilTVPairing {
     this.deviceInformation = getDeviceObject(this.deviceId);
   }
 
-  private async init() {
+  async init() {
     const [errGetSystem, dataInfoSystem] = await getInformationSystem(this.apiUrls.secure);
 
-    if (errGetSystem || (dataInfoSystem && !dataInfoSystem.isReady)) {
-      consola.error(`
-      Check if the TV is on and the IP is correct.
-      Only Philips TVs with API version 6 or higher are supported.
-      Only secure transport and digest auth pairing are supported (https).\n
-     
-      ${errGetSystem ? errGetSystem?.message : ''}
-     
-      Bye.
-      `);
-      process.exit(1);
+    if (!errGetSystem) {
+      this.apiVersion = dataInfoSystem?.apiVersion;
+      this.pairingRequestUrl = `${this.apiUrls.secure}/${this.apiVersion}/pair/request`;
     }
 
-    if (dataInfoSystem) {
-      const { apiVersion, isReady } = dataInfoSystem;
-
-      this.apiVersion = apiVersion;
-    }
+    return [errGetSystem, dataInfoSystem] as const;
   }
 
   async startPairing() {
-    await this.init();
     const client = getHttpClient();
-    const { data: res } = await client.request(`${this.apiUrls.secure}/${this.apiVersion}/pair/request`, {
+    const { data: res } = await client.request(this.pairingRequestUrl, {
       method: 'POST',
       data: {
         device: this.deviceInformation,

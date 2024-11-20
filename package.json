@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "consola": "3.2.3",
-    "figlet": "1.8.0",
+    "is-ip": "5.0.1",
     "radash": "12.1.0",
     "urllib": "4.4.0",
     "zod": "3.23.8"
@@ -52,6 +52,7 @@
     "@biomejs/biome": "1.9.4",
     "@release-it/conventional-changelog": "9.0.3",
     "@types/node": "22.9.1",
+    "@types/validator": "13.12.2",
     "release-it": "17.10.0",
     "tsup": "8.3.5",
     "tsx": "4.19.2",
