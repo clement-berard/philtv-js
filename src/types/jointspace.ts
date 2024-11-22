@@ -7,5 +7,7 @@ export type AmbilightFollowVideoMode = (typeof JOINTSPACE_CONSTANTS.ambilight.fo
 export type AmbilightFollowAudioMode = (typeof JOINTSPACE_CONSTANTS.ambilight.followAudioMode)[number];
 
 export type AmbilightChangeBrightnessAvailableValues =
-  | (typeof JOINTSPACE_CONSTANTS.ambilight.brightnessAvailableValues)[number]
-  | string;
+  (typeof JOINTSPACE_CONSTANTS.ambilight.ambilightChangeBrightnessAvailableValues)[number];
+
+export type AmbilightSetBrightnessAvailableValues =
+  (typeof JOINTSPACE_CONSTANTS.ambilight.ambilightBrightnessAvailableValues)[number];

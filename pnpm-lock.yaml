@@ -20,6 +20,9 @@ importers:
       radash:
         specifier: 12.1.0
         version: 12.1.0
+      superstruct:
+        specifier: ^2.0.2
+        version: 2.0.2
       urllib:
         specifier: 4.4.0
         version: 4.4.0
@@ -2491,6 +2494,10 @@ packages:
   superjson@2.2.1:
     resolution: {integrity: sha512-8iGv75BYOa0xRJHK5vRLEjE2H/i4lulTjzpUXic3Eg8akftYjkmQDa8JARQ42rlczXyFR3IeRoeFCc7RxHsYZA==}
     engines: {node: '>=16'}
+
+  superstruct@2.0.2:
+    resolution: {integrity: sha512-uV+TFRZdXsqXTL2pRvujROjdZQ4RAlBUS5BTh9IGm+jTqQntYThciG/qu57Gs69yjnVUSqdxF9YLmSnpupBW9A==}
+    engines: {node: '>=14.0.0'}
 
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
@@ -5147,6 +5154,8 @@ snapshots:
   superjson@2.2.1:
     dependencies:
       copy-anything: 3.0.5
+
+  superstruct@2.0.2: {}
 
   supports-color@7.2.0:
     dependencies:
