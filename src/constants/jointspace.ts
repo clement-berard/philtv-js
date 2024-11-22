@@ -60,13 +60,32 @@ const ambilightFollowAudioModeEnum = [
   'VU_METER',
 ] as const;
 
-const ambilightChangeBrightnessAvailableValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'increase', 'decrease'] as const;
+const ambilightBrightnessAvailableValuesIntegers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const ambilightChangeBrightnessAvailableValuesStrings = ['increase', 'decrease'] as const;
+const ambilightBrightnessAvailableValuesStrings = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
+const ambilightBrightnessAvailableValues = [
+  ...ambilightBrightnessAvailableValuesIntegers,
+  ...ambilightBrightnessAvailableValuesStrings,
+] as const;
+const ambilightChangeBrightnessAvailableValues = [
+  ...ambilightBrightnessAvailableValuesIntegers,
+  ...ambilightBrightnessAvailableValuesStrings,
+  ...ambilightChangeBrightnessAvailableValuesStrings,
+] as const;
+
+const ambilightChangeBrightnessAvailableSinglesValues = [
+  ...ambilightBrightnessAvailableValuesStrings,
+  ...ambilightChangeBrightnessAvailableValuesStrings,
+] as const;
 
 export const JOINTSPACE_CONSTANTS = {
   ambilight: {
     followAudioMode: ambilightFollowAudioModeEnum,
     followVideoMode: ambilightFollowVideoModeEnum,
     brightnessAvailableValues: ambilightChangeBrightnessAvailableValues,
+    ambilightChangeBrightnessAvailableValues,
+    ambilightBrightnessAvailableValues,
+    ambilightChangeBrightnessAvailableSinglesValues,
   },
   inputKeys,
 } as const;

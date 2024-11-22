@@ -1,7 +1,14 @@
 import { get } from 'radash';
+import * as superstruct from 'superstruct';
 import { z } from 'zod';
 import { JOINTSPACE_CONSTANTS } from '../constants';
-import type { AmbilightFollowAudioMode, AmbilightFollowVideoMode, InputKeys } from '../types/jointspace';
+import type {
+  AmbilightChangeBrightnessAvailableValues,
+  AmbilightFollowAudioMode,
+  AmbilightFollowVideoMode,
+  AmbilightSetBrightnessAvailableValues,
+  InputKeys,
+} from '../types';
 import { PhilTVApiBase } from './PhilTVApiBase';
 
 export class PhilTVApi extends PhilTVApiBase {
@@ -17,32 +24,39 @@ export class PhilTVApi extends PhilTVApiBase {
     ] as const;
   }
 
-  async setAmbilightBrightness(brightness: number) {
+  async setAmbilightBrightness(brightness: AmbilightSetBrightnessAvailableValues) {
+    const schema = superstruct.enums(JOINTSPACE_CONSTANTS.ambilight.ambilightBrightnessAvailableValues as any);
+
+    const [errValidation] = schema.validate(brightness);
+
+    if (errValidation) {
+      return this.renderResponse(errValidation, undefined);
+    }
+
     return this.handleSetMenuItemSetting('ambilight_brightness', {
-      value: brightness,
+      value: Number(brightness),
     });
   }
 
-  async changeAmbilightBrightness(move: string | number) {
-    const [, currentBrightness] = await this.getAmbilightBrightnessValue();
+  async changeAmbilightBrightness(move: AmbilightChangeBrightnessAvailableValues) {
+    const schema = superstruct.enums(JOINTSPACE_CONSTANTS.ambilight.ambilightChangeBrightnessAvailableValues as any);
 
-    const realValue = (Number.isNaN(Number(move)) ? move : Number(move)) as any;
+    const [errValidation] = schema.validate(move);
 
-    const isValid = JOINTSPACE_CONSTANTS.ambilight.brightnessAvailableValues.includes(realValue);
-
-    if (!isValid) {
-      return this.renderResponse(new Error('Invalid value'), undefined);
+    if (errValidation) {
+      return this.renderResponse(errValidation, undefined);
     }
 
-    if (typeof realValue === 'string') {
-      const computedBrightness =
-        realValue === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
-      const realBrightness = Math.min(10, Math.max(0, computedBrightness));
+    const [, currentBrightness] = await this.getAmbilightBrightnessValue();
+
+    if (move === 'increase' || move === 'decrease') {
+      const computedBrightness = move === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
+      const realBrightness = Math.min(10, Math.max(0, computedBrightness)) as AmbilightSetBrightnessAvailableValues;
 
       return this.setAmbilightBrightness(realBrightness);
     }
 
-    return this.setAmbilightBrightness(realValue);
+    return this.setAmbilightBrightness(move);
   }
 
   increaseAmbilightBrightness() {
