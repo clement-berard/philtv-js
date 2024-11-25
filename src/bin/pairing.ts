@@ -63,8 +63,23 @@ ${pkgJson.version}
   consola.success('TV is ready with API version', dataInit?.apiVersion);
 
   consola.start(`Trying to pair TV at ${pjs.pairingRequestUrl}...`);
+  const [errStart] = await pjs.startPairing();
+
+  if (errStart) {
+    consola.error(`
+      Failed to start pairing.\n
+      ${errStart?.message}\n
+      Bye.
+      `);
+    process.exit(1);
+  }
+
   // `startPairing` returns a function to prompt for the pin, can be useful
-  const { promptForPin } = await pjs.startPairing();
+  const promptForPin = async () =>
+    await consola.prompt('Enter pin code from TV:', {
+      type: 'text',
+    });
+
   const pin = await promptForPin();
 
   // `completePairing` returns the configuration object, or an error

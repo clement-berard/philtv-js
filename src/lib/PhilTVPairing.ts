@@ -1,5 +1,4 @@
 import { randomBytes } from 'node:crypto';
-import { consola } from 'consola';
 import { JS_SECRET_KEY } from '../constants';
 import { getHttpClient, getHttpDigestClient } from '../http-clients';
 import { getDeviceObject } from '../utils';
@@ -94,12 +93,7 @@ export class PhilTVPairing {
     const { timestamp: authTimestamp, auth_key: authKey, timeout, error_id, error_text } = res as any;
 
     if (error_id !== 'SUCCESS') {
-      consola.error(`
-      Failed to start pairing.\n
-      ${error_text}\n
-      Bye.
-      `);
-      process.exit(1);
+      return [new Error(`Failed to start pairing: ${error_text}`), undefined] as const;
     }
 
     this.startPairingResponse = {
@@ -121,19 +115,10 @@ export class PhilTVPairing {
       }),
     };
 
-    const promptForPin = async () =>
-      await consola.prompt('Enter pin code from TV:', {
-        type: 'text',
-      });
-
-    return {
-      promptForPin,
-    };
+    return [undefined, this.startPairingResponse] as const;
   }
 
   async completePairing(pin: string) {
-    consola.start('Completing pairing...');
-
     if (!pin) {
       return [new Error('Failed to complete pairing'), undefined] as const;
     }
