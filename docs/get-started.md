@@ -12,7 +12,7 @@ This library leverages the lightweight [urllib](https://www.npmjs.com/package/ur
 **Works only in secure environments (HTTPS) and with versions 6 of the JointSpace protocol.**
 :::
 
-## Installation
+## Installation 🧑‍💻
 
 To install `philtv-js`, you can use npm:
 
@@ -20,7 +20,12 @@ To install `philtv-js`, you can use npm:
 npm install philtv-js
 ```
 
-## Useful resources
+## Used by 💪
+
+- [node-red-contrib-js-philips-tv-control](https://www.npmjs.com/package/@keload/node-red-contrib-js-philips-tv-control)
+
+## Useful resources 📚
+
 - https://jointspace.sourceforge.net/projectdata/jointSPACE_API_Reference_Manual.pdf
 - https://github.com/lucasvdh/codes.lucasvdh.philips-jointspace
 - https://gist.github.com/marcelrv/ee9a7cf97c227d069e4ee88d26691019
