@@ -13,10 +13,14 @@ import { PhilTVApiBase } from './PhilTVApiBase';
 
 export class PhilTVApi extends PhilTVApiBase {
   async getSystem() {
-    const [err, data, resp] = await this.digestClient.request('system');
+    const [err, data] = await this.digestClient.request('system');
+
+    if (err) {
+      return this.renderResponse(err, undefined);
+    }
 
     return [
-      err,
+      undefined,
       {
         ...data,
         fullApiVersion: `${data.api_version.Major}.${data.api_version.Minor}.${data.api_version.Patch}`,
