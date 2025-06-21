@@ -42,6 +42,7 @@ export function getHttpDigestClient(config: GetHttpDigestClient) {
     defaultArgs: {
       digestAuth: `${config.user}:${config.password}`,
       contentType: 'json',
+      headers: {},
     },
   });
 
