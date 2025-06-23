@@ -51,10 +51,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@release-it/conventional-changelog": "9.0.3",
-    "@types/node": "22.9.1",
+    "@release-it/conventional-changelog": "10.0.1",
+    "@types/node": "24.0.3",
     "@types/validator": "13.15.2",
-    "release-it": "17.10.0",
+    "release-it": "19.0.3",
     "tsup": "8.5.0",
     "tsx": "4.20.3",
     "typedoc": "0.28.5",
