@@ -38,7 +38,7 @@ export async function checkUrl(url: string) {
     await client.request(url, { method: 'GET', timeout: 1000 });
 
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
