@@ -1,6 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
+    directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
@@ -9,16 +10,16 @@ updates:
         patterns:
           - "*"
         update-types:
-          - "patch"
+          - patch
 
       minor-updates:
         patterns:
           - "*"
         update-types:
-          - "minor"
+          - minor
 
       major-updates:
         patterns:
           - "*"
         update-types:
-          - "major"
+          - major
