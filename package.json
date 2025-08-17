@@ -47,7 +47,7 @@
     "radash": "12.1.1",
     "superstruct": "^2.0.2",
     "urllib": "4.6.11",
-    "zod": "3.25.67"
+    "zod": "4.0.17"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",
