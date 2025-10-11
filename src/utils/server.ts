@@ -4,6 +4,6 @@ export function createSignature(secretKey: Buffer, secret: string) {
   const hmac = createHmac('sha1', secretKey);
   hmac.write(secret);
   hmac.end();
-  // @ts-ignore
+  // @ts-expect-error
   return hmac.read('binary').toString('base64');
 }
