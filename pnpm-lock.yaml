@@ -47,7 +47,7 @@ importers:
         version: 19.0.5(@types/node@24.8.1)
       tsdown:
         specifier: ^0.15.7
-        version: 0.15.7(typescript@5.9.3)
+        version: 0.15.8(typescript@5.9.3)
       tsx:
         specifier: 4.20.6
         version: 4.20.6
@@ -2298,8 +2298,8 @@ packages:
   trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
 
-  tsdown@0.15.7:
-    resolution: {integrity: sha512-uFaVgWAogjOMqjY+CQwrUt3C6wzy6ynt82CIoXymnbS17ipUZ8WDXUceJjkislUahF/BZc5+W44Ue3p2oWtqUg==}
+  tsdown@0.15.8:
+    resolution: {integrity: sha512-A9CY3lO2SC6G5wyQV38cNdPkDmCoIQ6zYVd+lLnEGH09BxNRTJkCHfb7cBeBxZYJDYGFtgg/3yBpEryYJjBd+Q==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
@@ -2699,7 +2699,7 @@ snapshots:
   '@conventional-changelog/git-client@1.0.1(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.2.0)':
     dependencies:
       '@types/semver': 7.7.0
-      semver: 7.7.2
+      semver: 7.7.3
     optionalDependencies:
       conventional-commits-filter: 5.0.0
       conventional-commits-parser: 6.2.0
@@ -3653,7 +3653,7 @@ snapshots:
       conventional-commits-filter: 5.0.0
       handlebars: 4.7.8
       meow: 13.2.0
-      semver: 7.7.2
+      semver: 7.7.3
 
   conventional-changelog@6.0.0(conventional-commits-filter@5.0.0):
     dependencies:
@@ -4230,7 +4230,7 @@ snapshots:
   normalize-package-data@6.0.2:
     dependencies:
       hosted-git-info: 7.0.2
-      semver: 7.7.2
+      semver: 7.7.3
       validate-npm-package-license: 3.0.4
 
   npm-run-path@5.3.0:
@@ -4689,7 +4689,7 @@ snapshots:
 
   trim-lines@3.0.1: {}
 
-  tsdown@0.15.7(typescript@5.9.3):
+  tsdown@0.15.8(typescript@5.9.3):
     dependencies:
       ansis: 4.2.0
       cac: 6.7.14
