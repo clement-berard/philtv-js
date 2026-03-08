@@ -1,5 +1,4 @@
 import { get } from 'radash';
-import * as superstruct from 'superstruct';
 import { z } from 'zod';
 import { JOINTSPACE_CONSTANTS } from '../constants';
 import type {
@@ -29,9 +28,9 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async setAmbilightBrightness(brightness: AmbilightSetBrightnessAvailableValues) {
-    const schema = superstruct.enums(JOINTSPACE_CONSTANTS.ambilight.ambilightBrightnessAvailableValues as any);
+    const schema = z.enum(JOINTSPACE_CONSTANTS.ambilight.ambilightBrightnessAvailableValues as any);
 
-    const [errValidation] = schema.validate(brightness);
+    const { error: errValidation } = schema.safeParse(brightness);
 
     if (errValidation) {
       return this.renderResponse(errValidation, undefined);
@@ -43,9 +42,9 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async changeAmbilightBrightness(move: AmbilightChangeBrightnessAvailableValues) {
-    const schema = superstruct.enums(JOINTSPACE_CONSTANTS.ambilight.ambilightChangeBrightnessAvailableValues as any);
+    const schema = z.enum(JOINTSPACE_CONSTANTS.ambilight.ambilightChangeBrightnessAvailableValues as any);
 
-    const [errValidation] = schema.validate(move);
+    const { error: errValidation } = schema.safeParse(move);
 
     if (errValidation) {
       return this.renderResponse(errValidation, undefined);

@@ -1,5 +1,5 @@
+import { isIP } from 'node:net';
 import { consola } from 'consola';
-import { isIP } from 'is-ip';
 import pkgJson from '../../package.json';
 import { PhilTVPairing } from '../lib/PhilTVPairing';
 
@@ -22,18 +22,7 @@ ${pkgJson.version}
 `.trim(),
   );
 
-  let ipAddress: string;
-
-  if (!inIP) {
-    const promptForIp = async () =>
-      await consola.prompt('Enter TV ip address:', {
-        type: 'text',
-      });
-
-    ipAddress = await promptForIp();
-  } else {
-    ipAddress = inIP.trim();
-  }
+  const ipAddress = inIP ? inIP.trim() : await consola.prompt('Enter TV ip address:', { type: 'text' });
 
   if (!isIP(ipAddress)) {
     consola.error(`'${ipAddress}' is an invalid IP address. Bye.`);
