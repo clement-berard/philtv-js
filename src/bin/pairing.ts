@@ -1,5 +1,5 @@
+import { isIP } from 'node:net';
 import { consola } from 'consola';
-import { isIP } from 'is-ip';
 import pkgJson from '../../package.json';
 import { PhilTVPairing } from '../lib/PhilTVPairing';
 
