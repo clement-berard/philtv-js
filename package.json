@@ -44,7 +44,7 @@
   "dependencies": {
     "consola": "3.4.2",
     "radash": "12.1.1",
-    "urllib": "4.8.2",
+    "urllib": "4.9.0",
     "zod": "4.3.6"
   },
   "devDependencies": {

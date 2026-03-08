@@ -18,8 +18,8 @@ importers:
         specifier: 12.1.1
         version: 12.1.1
       urllib:
-        specifier: 4.8.2
-        version: 4.8.2
+        specifier: 4.9.0
+        version: 4.9.0
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -1645,8 +1645,8 @@ packages:
   focus-trap@7.6.5:
     resolution: {integrity: sha512-7Ke1jyybbbPZyZXFxEftUtxFGLMpE2n6A+z//m4CRDlj0hW+o3iYSmh8nFlYMurOiJVDmJRilUQtJr08KfIxlg==}
 
-  form-data@4.0.4:
-    resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
+  form-data@4.0.5:
+    resolution: {integrity: sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==}
     engines: {node: '>= 6'}
 
   formstream@1.5.2:
@@ -2090,8 +2090,8 @@ packages:
     resolution: {integrity: sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==}
     engines: {node: '>=6'}
 
-  qs@6.14.0:
-    resolution: {integrity: sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==}
+  qs@6.15.0:
+    resolution: {integrity: sha512-mAZTtNCeetKMH+pSjrb76NAM8V9a05I9aBZOHztWy/UqcJdQYNsf59vrRKWnojAT9Y+GbIvoTBC++CPHqpDBhQ==}
     engines: {node: '>=0.6'}
 
   quansync@1.0.0:
@@ -2421,8 +2421,8 @@ packages:
     resolution: {integrity: sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==}
     engines: {node: '>=18.17'}
 
-  undici@7.16.0:
-    resolution: {integrity: sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g==}
+  undici@7.22.0:
+    resolution: {integrity: sha512-RqslV2Us5BrllB+JeiZnK4peryVTndy9Dnqq62S3yYRRTj0tFQCwEniUy2167skdGOy3vqRzEvl1Dm4sV2ReDg==}
     engines: {node: '>=20.18.1'}
 
   unist-util-is@6.0.0:
@@ -2457,8 +2457,8 @@ packages:
     resolution: {integrity: sha512-n2huDr9h9yzd6exQVnH/jU5mr+Pfx08LRXXZhkLLetAMESRj+anQsTAh940iMrIetKAmry9coFuZQ2jY8/p3WA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  urllib@4.8.2:
-    resolution: {integrity: sha512-V5oo9kzQfF9UQAC9KOVFmmmbYPJ9nksgO8HM89BZse96QcCyjrssPVxKzL/9sVPRC8D4Sd3nAdaMCXAZ3dqEYA==}
+  urllib@4.9.0:
+    resolution: {integrity: sha512-Rp3DBvVqy9arSTMH6oN5N7OAN01U3dQ2xc19AadP86MzC4j67MDeqOup5shpWnjkDVGWfLfWPOd8CyqOtd6u3w==}
     engines: {node: '>= 18.19.0'}
 
   util-deprecate@1.0.2:
@@ -3946,7 +3946,7 @@ snapshots:
     dependencies:
       tabbable: 6.2.0
 
-  form-data@4.0.4:
+  form-data@4.0.5:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
@@ -4412,7 +4412,7 @@ snapshots:
 
   punycode.js@2.3.1: {}
 
-  qs@6.14.0:
+  qs@6.15.0:
     dependencies:
       side-channel: 1.1.0
 
@@ -4799,7 +4799,7 @@ snapshots:
 
   undici@6.21.3: {}
 
-  undici@7.16.0: {}
+  undici@7.22.0: {}
 
   unist-util-is@6.0.0:
     dependencies:
@@ -4832,14 +4832,14 @@ snapshots:
 
   url-join@5.0.0: {}
 
-  urllib@4.8.2:
+  urllib@4.9.0:
     dependencies:
-      form-data: 4.0.4
+      form-data: 4.0.5
       formstream: 1.5.2
       mime-types: 2.1.35
-      qs: 6.14.0
+      qs: 6.15.0
       type-fest: 4.41.0
-      undici: 7.16.0
+      undici: 7.22.0
       ylru: 2.0.0
 
   util-deprecate@1.0.2: {}
