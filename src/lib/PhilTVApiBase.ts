@@ -1,4 +1,4 @@
-import { getHttpDigestClient } from '../http-clients';
+import { getHttpDigestClient } from '../http-clients/http-digest-client';
 import type { FlatNode, PhilTVApiParams } from '../types';
 import { getFlattenNodes } from '../utils';
 

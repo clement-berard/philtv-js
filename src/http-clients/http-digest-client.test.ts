@@ -1,6 +1,6 @@
 import { HttpClient } from 'urllib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getHttpClient, getHttpDigestClient, handleRequest } from './index';
+import { getHttpClient, getHttpDigestClient, handleRequest } from './http-digest-client';
 
 const { mockRequest } = vi.hoisted(() => ({
   mockRequest: vi.fn(),
