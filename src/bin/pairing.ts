@@ -22,18 +22,7 @@ ${pkgJson.version}
 `.trim(),
   );
 
-  let ipAddress: string;
-
-  if (!inIP) {
-    const promptForIp = async () =>
-      await consola.prompt('Enter TV ip address:', {
-        type: 'text',
-      });
-
-    ipAddress = await promptForIp();
-  } else {
-    ipAddress = inIP.trim();
-  }
+  const ipAddress = inIP ? inIP.trim() : await consola.prompt('Enter TV ip address:', { type: 'text' });
 
   if (!isIP(ipAddress)) {
     consola.error(`'${ipAddress}' is an invalid IP address. Bye.`);

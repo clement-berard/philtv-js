@@ -39,7 +39,8 @@
     "lint:check": "pnpm biome check",
     "typedoc:generate": "typedoc",
     "release": "pnpm release-it",
-    "release:test": "pnpm release-it --dry-run"
+    "release:test": "pnpm release-it --dry-run",
+    "test": "vitest ."
   },
   "dependencies": {
     "consola": "3.4.2",
@@ -59,7 +60,8 @@
     "typedoc-plugin-markdown": "4.10.0",
     "typedoc-vitepress-theme": "1.1.2",
     "typescript": "5.9.3",
-    "vitepress": "1.6.4"
+    "vitepress": "1.6.4",
+    "vitest": "^4.0.18"
   },
   "keywords": [
     "ambilight",

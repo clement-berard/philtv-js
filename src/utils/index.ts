@@ -1,5 +1,4 @@
 import { omit } from 'radash';
-import { getHttpClient } from '../http-clients';
 import type { FlatNode } from '../types';
 
 export function getDeviceObject(deviceId: string) {
@@ -30,15 +29,4 @@ export function getFlattenNodes(allInput: any) {
   flattenNodes(allInput);
 
   return result;
-}
-
-export async function checkUrl(url: string) {
-  const client = getHttpClient();
-  try {
-    await client.request(url, { method: 'GET', timeout: 1000 });
-
-    return true;
-  } catch {
-    return false;
-  }
 }
