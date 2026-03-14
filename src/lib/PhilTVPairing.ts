@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { JS_SECRET_KEY } from '../constants';
+import { JS_SECRET_KEY } from '../constants/app.constant';
 import { getHttpClient, getHttpDigestClient } from '../http-clients/http-digest-client';
 import { getDeviceObject } from '../utils';
 import { createSignature } from '../utils/server';

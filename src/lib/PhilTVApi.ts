@@ -1,11 +1,16 @@
 import { get } from 'radash';
-import { z } from 'zod';
-import { JOINTSPACE_CONSTANTS } from '../constants';
+import {
+  ambilightBrightnessChoicesSchema,
+  ambilightFollowAudioModeSchema,
+  ambilightFollowVideoModeSchema,
+  ambilightModesSchema,
+  inputKeysSchema,
+} from '../schemas/jointspace.schema';
 import type {
-  AmbilightChangeBrightnessAvailableValues,
+  AmbilightBrightnessChoices,
   AmbilightFollowAudioMode,
   AmbilightFollowVideoMode,
-  AmbilightSetBrightnessAvailableValues,
+  AmbilightModes,
   InputKeys,
 } from '../types';
 import { PhilTVApiBase } from './PhilTVApiBase';
@@ -27,10 +32,8 @@ export class PhilTVApi extends PhilTVApiBase {
     ] as const;
   }
 
-  async setAmbilightBrightness(brightness: AmbilightSetBrightnessAvailableValues) {
-    const schema = z.enum(JOINTSPACE_CONSTANTS.ambilight.ambilightBrightnessAvailableValues as any);
-
-    const { error: errValidation } = schema.safeParse(brightness);
+  async setAmbilightBrightness(brightness: AmbilightBrightnessChoices) {
+    const { error: errValidation } = ambilightBrightnessChoicesSchema.safeParse(brightness);
 
     if (errValidation) {
       return this.renderResponse(errValidation, undefined);
@@ -41,33 +44,22 @@ export class PhilTVApi extends PhilTVApiBase {
     });
   }
 
-  async changeAmbilightBrightness(move: AmbilightChangeBrightnessAvailableValues) {
-    const schema = z.enum(JOINTSPACE_CONSTANTS.ambilight.ambilightChangeBrightnessAvailableValues as any);
-
-    const { error: errValidation } = schema.safeParse(move);
-
-    if (errValidation) {
-      return this.renderResponse(errValidation, undefined);
-    }
-
+  async increaseAmbilightBrightness() {
     const [, currentBrightness] = await this.getAmbilightBrightnessValue();
 
-    if (move === 'increase' || move === 'decrease') {
-      const computedBrightness = move === 'increase' ? Number(currentBrightness) + 1 : Number(currentBrightness) - 1;
-      const realBrightness = Math.min(10, Math.max(0, computedBrightness)) as AmbilightSetBrightnessAvailableValues;
+    const computedBrightness = Number(currentBrightness) + 1;
+    const realBrightness = Math.min(10, Math.max(0, computedBrightness)) as AmbilightBrightnessChoices;
 
-      return this.setAmbilightBrightness(realBrightness);
-    }
-
-    return this.setAmbilightBrightness(move);
+    return this.setAmbilightBrightness(realBrightness);
   }
 
-  increaseAmbilightBrightness() {
-    return this.changeAmbilightBrightness('increase');
-  }
+  async decreaseAmbilightBrightness() {
+    const [, currentBrightness] = await this.getAmbilightBrightnessValue();
 
-  decreaseAmbilightBrightness() {
-    return this.changeAmbilightBrightness('decrease');
+    const computedBrightness = Number(currentBrightness) - 1;
+    const realBrightness = Math.min(10, Math.max(0, computedBrightness)) as AmbilightBrightnessChoices;
+
+    return this.setAmbilightBrightness(realBrightness);
   }
 
   getAmbilightConfiguration() {
@@ -133,7 +125,7 @@ export class PhilTVApi extends PhilTVApiBase {
     return [err1 || err2 || err3 || err4 || err5, result] as const;
   }
 
-  protected async setAmbilightCurrentConfiguration(options: Record<any, any>) {
+  protected async setAmbilightCurrentConfiguration(options: Record<string, unknown>) {
     return this.digestClient.request('ambilight/currentconfiguration', {
       method: 'POST',
       data: {
@@ -145,7 +137,7 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async setAmbilightFollowVideoMode(mode: AmbilightFollowVideoMode) {
-    const validator = z.enum(JOINTSPACE_CONSTANTS.ambilight.followVideoMode).safeParse(mode);
+    const validator = ambilightFollowVideoModeSchema.safeParse(mode);
 
     if (validator.error) {
       return this.renderResponse(validator.error, undefined);
@@ -158,7 +150,7 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   async setAmbilightFollowAudioMode(mode: AmbilightFollowAudioMode) {
-    const validator = z.enum(JOINTSPACE_CONSTANTS.ambilight.followAudioMode).safeParse(mode);
+    const validator = ambilightFollowAudioModeSchema.safeParse(mode);
 
     if (validator.error) {
       return this.renderResponse(validator.error, undefined);
@@ -170,7 +162,13 @@ export class PhilTVApi extends PhilTVApiBase {
     });
   }
 
-  setAmbilightMode(mode: 'manual' | 'internal' | 'expert') {
+  setAmbilightMode(mode: AmbilightModes) {
+    const { error: errValidation } = ambilightModesSchema.safeParse(mode);
+
+    if (errValidation) {
+      return this.renderResponse(errValidation, undefined);
+    }
+
     return this.digestClient.request('ambilight/mode', {
       method: 'POST',
       data: {
@@ -192,6 +190,12 @@ export class PhilTVApi extends PhilTVApiBase {
   }
 
   sendKey(key: InputKeys) {
+    const { error: errValidation } = inputKeysSchema.safeParse(key);
+
+    if (errValidation) {
+      return this.renderResponse(errValidation, undefined);
+    }
+
     return this.digestClient.request('input/key', {
       method: 'POST',
       data: {
