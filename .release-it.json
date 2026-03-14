@@ -3,7 +3,7 @@
     "before:init": "pnpm build"
   },
   "git": {
-    "requireBranch": "main",
+    "requireBranch": "1.x",
     "commitMessage": "chore(release): ${version}",
     "tagName": "v${version}",
     "requireCleanWorkingDir": true,
@@ -15,6 +15,7 @@
   },
   "npm": {
     "publish": true,
+    "tag": "latest",
     "tokenRef": "NPM_TOKEN"
   },
   "plugins": {
