@@ -11,10 +11,12 @@
   },
   "github": {
     "release": true,
+    "preRelease": true,
     "tokenRef": "GITHUB_TOKEN"
   },
   "npm": {
     "publish": true,
+    "tag": "next",
     "tokenRef": "NPM_TOKEN"
   },
   "plugins": {
