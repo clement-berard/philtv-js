@@ -25,6 +25,8 @@ export default defineConfig([
     treeshake: true,
     format: ['cjs'],
     target: 'node16',
-    noExternal: ['is-ip'],
+    deps: {
+      alwaysBundle: ['is-ip'],
+    }
   },
 ]);

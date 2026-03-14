@@ -1,4 +1,5 @@
 import { getHttpDigestClient } from '../http-clients/http-digest-client';
+import { philTVApiParamsSchemas } from '../schemas/philtvApi.schema';
 import type { FlatNode, PhilTVApiParams } from '../types';
 import { getFlattenNodes } from '../utils';
 
@@ -9,10 +10,11 @@ export class PhilTVApiBase {
   protected digestClient: ReturnType<typeof getHttpDigestClient>;
 
   constructor(params: PhilTVApiParams) {
+    const { user, apiUrl, password } = philTVApiParamsSchemas.parse(params);
     this.digestClient = getHttpDigestClient({
-      user: params.user,
-      password: params.password,
-      baseUrl: params.apiUrl,
+      user,
+      password,
+      baseUrl: apiUrl,
     });
   }
 
