@@ -4,6 +4,8 @@ import { type ApiResult, getHttpClient, getHttpDigestClient } from '../http-clie
 import { getDeviceObject } from '../utils';
 import { createSignature } from '../utils/server';
 
+/** * @internal
+ */
 export interface SystemInformation {
   apiVersion: number;
   systemFeatures: Record<string, unknown>;
@@ -50,11 +52,14 @@ export async function getInformationSystem(apiUrl: string): Promise<ApiResult<Sy
   }
 }
 
+/** * @internal
+ */
 export type PhilTVPairingParams = {
   tvIp: string;
   apiPort?: number;
 };
 
+/** @internal */
 export class PhilTVPairing {
   private tvBase: PhilTVPairingParams;
   public readonly deviceId: string;

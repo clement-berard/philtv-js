@@ -7,6 +7,7 @@ import { MenuApi } from './MenuApi';
 import { SystemApi } from './SystemApi';
 
 export class PhilTVApi {
+  /** @internal */
   public readonly digestClient: ReturnType<typeof getHttpDigestClient>;
   public readonly menu: MenuApi;
   public readonly system: SystemApi;

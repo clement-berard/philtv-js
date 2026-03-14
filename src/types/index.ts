@@ -5,9 +5,12 @@ import type { philTVApiParamsSchemas } from '../schemas/philtvApi.schema';
  * Parameters required to initialize the `PhilTVApiBase` class.
  *
  * This object includes the API connection details and optional configuration settings.
+ *
+ * @internal
  */
 export type PhilTVApiParams = z.infer<typeof philTVApiParamsSchemas>;
 
+/** @internal */
 export type FlatNode = {
   node_id: number;
   type: string;

@@ -9,9 +9,20 @@ interface SystemData {
   [key: string]: unknown;
 }
 
+/**
+ * Provides methods to retrieve system-level information,
+ * such as the API version, current activity, and available applications.
+ */
 export class SystemApi {
+  /** @internal */
   constructor(private readonly digestClient: ReturnType<typeof getHttpDigestClient>) {}
 
+  /**
+   * Retrieves system information, including a pre-formatted `fullApiVersion` string.
+   *
+   * @returns A result object containing the system data with an additional
+   * `fullApiVersion` field formatted as `"Major.Minor.Patch"`.
+   */
   async getSystem() {
     const res = await this.digestClient.request<SystemData>('system');
 
@@ -28,10 +39,20 @@ export class SystemApi {
     };
   }
 
+  /**
+   * Retrieves the currently active activity.
+   *
+   * @returns A result object containing the current activity data.
+   */
   getCurrentActivity() {
     return this.digestClient.request('activities/current');
   }
 
+  /**
+   * Retrieves the list of available applications.
+   *
+   * @returns A result object containing the applications data.
+   */
   getApplications() {
     return this.digestClient.request('applications');
   }
