@@ -4,6 +4,7 @@ export default defineConfig([
   {
     entry: {
       index: 'src/index.ts',
+      constants: 'src/constants/app.constant.ts',
     },
     clean: true,
     dts: true,

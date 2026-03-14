@@ -3,8 +3,8 @@
   "version": "2.0.0-beta.0",
   "description": "A simple library to pair and interact with Philips TV",
   "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -14,8 +14,14 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
+    },
+    "./constants": {
+      "types": "./dist/constants.d.mts",
+      "import": "./dist/constants.mjs",
+      "require": "./dist/constants.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -41,9 +47,9 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.6",
-    "@release-it/conventional-changelog": "10.0.5",
-    "@types/node": "25.3.5",
+    "@biomejs/biome": "2.4.7",
+    "@release-it/conventional-changelog": "10.0.6",
+    "@types/node": "25.5.0",
     "@types/validator": "13.15.10",
     "release-it": "19.2.4",
     "tsdown": "^0.16.4",
@@ -53,7 +59,7 @@
     "typedoc-vitepress-theme": "1.1.2",
     "typescript": "5.9.3",
     "vitepress": "1.6.4",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "keywords": [
     "ambilight",
