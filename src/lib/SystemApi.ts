@@ -1,13 +1,5 @@
-import type { getHttpDigestClient } from '../http-clients/http-digest-client';
-
-interface SystemData {
-  api_version: {
-    Major: number;
-    Minor: number;
-    Patch: number;
-  };
-  [key: string]: unknown;
-}
+import type { ApiResult, getHttpDigestClient } from '../http-clients/http-digest-client';
+import type { ApplicationList, CurrentActivity, SystemInfo, SystemInfoEnriched } from '../types';
 
 /**
  * Provides methods to retrieve system-level information,
@@ -23,8 +15,8 @@ export class SystemApi {
    * @returns A result object containing the system data with an additional
    * `fullApiVersion` field formatted as `"Major.Minor.Patch"`.
    */
-  async getSystem() {
-    const res = await this.digestClient.request<SystemData>('system');
+  async getSystem(): Promise<ApiResult<SystemInfoEnriched>> {
+    const res = await this.digestClient.request<SystemInfo>('system');
 
     if (!res.success) {
       return res;
@@ -44,16 +36,16 @@ export class SystemApi {
    *
    * @returns A result object containing the current activity data.
    */
-  getCurrentActivity() {
+  getCurrentActivity(): Promise<ApiResult<CurrentActivity>> {
     return this.digestClient.request('activities/current');
   }
 
   /**
    * Retrieves the list of available applications.
    *
-   * @returns A result object containing the applications data.
+   * @returns A result object containing the applications' data.
    */
-  getApplications() {
+  getApplications(): Promise<ApiResult<ApplicationList>> {
     return this.digestClient.request('applications');
   }
 }

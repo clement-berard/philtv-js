@@ -1,4 +1,4 @@
-import type { getHttpDigestClient } from '../http-clients/http-digest-client';
+import type { ApiResult, getHttpDigestClient } from '../http-clients/http-digest-client';
 import {
   ambilightBrightnessChoicesSchema,
   ambilightFollowAudioModeSchema,
@@ -13,7 +13,8 @@ import type {
 } from '../types';
 import type { MenuApi } from './MenuApi';
 
-interface MenuSettingValue {
+/** @internal */
+export interface MenuSettingValue {
   value?: unknown;
   data?: {
     value?: string | number;
@@ -37,13 +38,16 @@ export class AmbilightApi {
    * @param brightness - The target brightness level to apply.
    * @returns A result object indicating success or failure.
    */
-  async setAmbilightBrightness(brightness: AmbilightBrightnessChoices) {
+  async setAmbilightBrightness(brightness: AmbilightBrightnessChoices): Promise<ApiResult> {
     try {
       const _brightness = ambilightBrightnessChoicesSchema.parse(brightness);
+      const flatNode = await this.menuApi.getMenuStructureItem('ambilight_brightness');
 
-      return this.menuApi.handleSetMenuItemSetting('ambilight_brightness', {
-        value: Number(_brightness),
-      });
+      if (!flatNode.success) {
+        return { success: false, error: flatNode.error ?? new Error('Failed to fetch menu structure item') };
+      }
+
+      return this.menuApi.setMenuItemSetting(flatNode.data, Number(_brightness));
     } catch (err) {
       return {
         success: false,
@@ -58,7 +62,7 @@ export class AmbilightApi {
    * @param nodeId - The node ID of the menu item to query.
    * @returns A result object containing the setting values, or an error if none are found.
    */
-  async getCurrentSetting(nodeId: number) {
+  async getCurrentSetting(nodeId: number): Promise<ApiResult> {
     const res = await this.digestClient.request<unknown[]>('menuitems/settings/current', {
       method: 'POST',
       data: { nodes: [{ nodeid: nodeId }] },
@@ -84,7 +88,7 @@ export class AmbilightApi {
    *
    * @returns A result object containing the raw setting value, or `undefined` if the node is not found.
    */
-  async getAmbilightBrightnessInformation() {
+  async getAmbilightBrightnessInformation(): Promise<ApiResult> {
     const itemRes = await this.menuApi.getMenuStructureItem('ambilight_brightness');
 
     if (!itemRes.success) {
@@ -101,6 +105,7 @@ export class AmbilightApi {
       return valuesRes;
     }
 
+    // @ts-expect-error
     return { success: true, data: valuesRes.data?.[0]?.value };
   }
 
@@ -109,7 +114,7 @@ export class AmbilightApi {
    *
    * @returns A result object containing the brightness level as a number.
    */
-  async getAmbilightBrightnessValue() {
+  async getAmbilightBrightnessValue(): Promise<ApiResult<number>> {
     const infoRes = await this.getAmbilightBrightnessInformation();
 
     if (!infoRes.success) {
@@ -127,7 +132,7 @@ export class AmbilightApi {
    *
    * @returns A result object from {@link setAmbilightBrightness}.
    */
-  async increaseAmbilightBrightness() {
+  async increaseAmbilightBrightness(): Promise<ApiResult> {
     const currentRes = await this.getAmbilightBrightnessValue();
 
     if (!currentRes.success) {

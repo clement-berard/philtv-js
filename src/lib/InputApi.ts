@@ -1,4 +1,4 @@
-import type { getHttpDigestClient } from '../http-clients/http-digest-client';
+import type { ApiResult, getHttpDigestClient } from '../http-clients/http-digest-client';
 import { inputKeysSchema } from '../schemas/jointspace.schema';
 import type { InputKeys } from '../types';
 
@@ -15,7 +15,7 @@ export class InputApi {
    * @param key - The key to send, validated against the allowed input keys.
    * @returns A result object indicating success or failure.
    */
-  sendKey(key: InputKeys) {
+  sendKey(key: InputKeys): Promise<ApiResult> {
     try {
       const _key = inputKeysSchema.parse(key);
 
