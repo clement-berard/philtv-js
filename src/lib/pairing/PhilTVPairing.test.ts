@@ -254,7 +254,7 @@ describe('PhilTVPairing', () => {
             data: { error_id: 'INVALID_PIN', error_text: 'Wrong PIN code' },
           }),
         };
-        pairing.httpClients = { digest: mockDigestClient as any };
+        (pairing as any).httpClients = { digest: mockDigestClient };
 
         const result = await pairing.completePairing('0000');
 
