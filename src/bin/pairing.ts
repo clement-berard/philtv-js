@@ -1,7 +1,7 @@
 import { isIP } from 'node:net';
 import { consola } from 'consola';
 import pkgJson from '../../package.json';
-import { PhilTVPairing } from '../lib/PhilTVPairing';
+import { PhilTVPairing } from '../lib/pairing/PhilTVPairing';
 
 const processOn = ['SIGINT', 'SIGTERM', 'uncaughtException'];
 
@@ -14,13 +14,7 @@ for (const eventName of processOn) {
 const inIP = process.argv[2];
 
 async function runPairing() {
-  consola.box(
-    `
-philtv-js
-Pairing TV
-${pkgJson.version}
-`.trim(),
-  );
+  consola.box(`\nphiltv-js\nPairing TV\n${pkgJson.version}\n`.trim());
 
   const ipAddress = inIP ? inIP.trim() : await consola.prompt('Enter TV ip address:', { type: 'text' });
 
@@ -34,36 +28,33 @@ ${pkgJson.version}
   consola.info(`Starting pairing with TV at ${pjs.apiUrls.secure}`);
   consola.start('Trying to contact TV...');
 
-  const [errInit, dataInit] = await pjs.init();
+  const initRes = await pjs.init();
 
-  if (errInit || (dataInit && !dataInit.isReady)) {
+  if (!initRes.success) {
     consola.error(`
       Check if the TV is on and the IP is correct.
       Only Philips TVs with API version 6 or higher are supported.
       Only secure transport and digest auth pairing are supported (https).\n
-
-      ${errInit ? errInit?.message : ''}
-
+      ${!initRes.success ? initRes.error.message : ''}
       Bye.
       `);
     process.exit(1);
   }
 
-  consola.success('TV is ready with API version', dataInit?.apiVersion);
+  consola.success('TV is ready with API version', initRes.data.apiVersion);
 
   consola.start(`Trying to pair TV at ${pjs.pairingRequestUrl}...`);
-  const [errStart] = await pjs.startPairing();
+  const startRes = await pjs.startPairing();
 
-  if (errStart) {
+  if (!startRes.success) {
     consola.error(`
       Failed to start pairing.\n
-      ${errStart?.message}\n
+      ${startRes.error.message}\n
       Bye.
       `);
     process.exit(1);
   }
 
-  // `startPairing` returns a function to prompt for the pin, can be useful
   const promptForPin = async () =>
     await consola.prompt('Enter pin code from TV:', {
       type: 'text',
@@ -71,15 +62,18 @@ ${pkgJson.version}
 
   const pin = await promptForPin();
 
-  // `completePairing` returns the configuration object, or an error
-  const [error, config] = await pjs.completePairing(pin);
+  const completeRes = await pjs.completePairing(pin as string);
 
-  if (!error) {
-    consola.success('Pairing successful');
-    consola.box(JSON.stringify(config, null, 2));
+  if (!completeRes.success) {
+    consola.error(`${completeRes.error.message}\nBye.`);
   } else {
-    consola.error(`${error.message}\nBye.`);
+    consola.success('Pairing successful');
+    consola.box(JSON.stringify(completeRes.data, null, 2));
   }
 }
 
-runPairing();
+if (process.env.NODE_ENV !== 'test') {
+  runPairing();
+}
+
+export { runPairing };

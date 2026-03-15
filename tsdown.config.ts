@@ -4,8 +4,7 @@ export default defineConfig([
   {
     entry: {
       index: 'src/index.ts',
-      constants: 'src/constants/index.ts',
-      utils: 'src/utils/index.ts',
+      constants: 'src/constants/app.constant.ts',
     },
     clean: true,
     dts: true,
@@ -26,6 +25,8 @@ export default defineConfig([
     treeshake: true,
     format: ['cjs'],
     target: 'node16',
-    noExternal: ['is-ip'],
+    deps: {
+      alwaysBundle: ['is-ip'],
+    }
   },
 ]);

@@ -35,7 +35,7 @@ jobs:
           cache: pnpm
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint:ci
 
       - name: Unit tests
         run: pnpm test
@@ -44,4 +44,4 @@ jobs:
         run: pnpm build
 
       - name: Build Docs
-        run: pnpm docs:generate
+        run: pnpm docs:build

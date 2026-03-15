@@ -1,13 +1,23 @@
-import type { JOINTSPACE_CONSTANTS } from '../constants';
+import type { z } from 'zod';
+import type {
+  ambilightBrightnessChoicesSchema,
+  ambilightFollowAudioModeSchema,
+  ambilightFollowVideoModeSchema,
+  ambilightModesSchema,
+  inputKeysSchema,
+} from '../schemas/jointspace.schema';
 
-export type InputKeys = (typeof JOINTSPACE_CONSTANTS.inputKeys)[number];
+/** @internal */
+export type InputKey = z.infer<typeof inputKeysSchema>;
 
-export type AmbilightFollowVideoMode = (typeof JOINTSPACE_CONSTANTS.ambilight.followVideoMode)[number] | string;
+/** @internal */
+export type AmbilightFollowVideoMode = z.infer<typeof ambilightFollowVideoModeSchema>;
 
-export type AmbilightFollowAudioMode = (typeof JOINTSPACE_CONSTANTS.ambilight.followAudioMode)[number];
+/** @internal */
+export type AmbilightFollowAudioMode = z.infer<typeof ambilightFollowAudioModeSchema>;
 
-export type AmbilightChangeBrightnessAvailableValues =
-  (typeof JOINTSPACE_CONSTANTS.ambilight.ambilightChangeBrightnessAvailableValues)[number];
+/** @internal */
+export type AmbilightBrightnessChoices = z.infer<typeof ambilightBrightnessChoicesSchema>;
 
-export type AmbilightSetBrightnessAvailableValues =
-  (typeof JOINTSPACE_CONSTANTS.ambilight.ambilightBrightnessAvailableValues)[number];
+/** @internal */
+export type AmbilightMode = z.infer<typeof ambilightModesSchema>;
