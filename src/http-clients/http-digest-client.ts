@@ -1,5 +1,7 @@
-import { tryit } from 'radash';
 import { HttpClient, type RequestOptions } from 'urllib';
+
+/** @internal */
+export type ApiResult<T = unknown> = { success: true; data: T } | { success: false; error: Error };
 
 type GetHttpDigestClient = {
   user: string;
@@ -10,10 +12,15 @@ type GetHttpDigestClient = {
   };
 };
 
-export async function handleRequest(url: string, baseUrl: string, client: HttpClient, reqOptions: RequestOptions = {}) {
-  const fullUrl = `${baseUrl}/${url}`;
-
+export async function handleRequest<T = unknown>(
+  url: string,
+  baseUrl: string,
+  client: HttpClient,
+  reqOptions: RequestOptions = {},
+): Promise<ApiResult<T>> {
   try {
+    const fullUrl = `${baseUrl}/${url}`;
+
     const resp = await client.request(fullUrl, {
       ...reqOptions,
     });
@@ -21,15 +28,24 @@ export async function handleRequest(url: string, baseUrl: string, client: HttpCl
     const ok = resp.status >= 200 && resp.status < 300;
 
     if (!ok) {
-      return [new Error(`Request failed with status ${resp.status} (${resp.url})`), undefined, resp] as const;
+      return {
+        success: false,
+        error: new Error(`Request failed with status ${resp.status} (${resp.url})`),
+      };
     }
 
-    const [errJsonParse, triedJson] = await tryit(JSON.parse)(resp.data.toString());
-    const realData = !errJsonParse ? triedJson : resp.data.toString();
+    const rawData = resp.data.toString();
 
-    return [undefined, realData, { ok, ...resp, data: realData }] as const;
-  } catch (error: unknown) {
-    return [error as Error, undefined, undefined] as const;
+    try {
+      return { success: true, data: JSON.parse(rawData) as T };
+    } catch {
+      return { success: true, data: rawData as unknown as T };
+    }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err : new Error(String(err)),
+    };
   }
 }
 
@@ -48,7 +64,8 @@ export function getHttpDigestClient(config: GetHttpDigestClient) {
 
   return {
     client,
-    request: (url: string, reqOptions: RequestOptions = {}) => handleRequest(url, config.baseUrl, client, reqOptions),
+    request: <T = unknown>(url: string, reqOptions: RequestOptions = {}) =>
+      handleRequest<T>(url, config.baseUrl, client, reqOptions),
   };
 }
 

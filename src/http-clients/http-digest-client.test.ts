@@ -2,162 +2,151 @@ import { HttpClient } from 'urllib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getHttpClient, getHttpDigestClient, handleRequest } from './http-digest-client';
 
-const { mockRequest } = vi.hoisted(() => ({
-  mockRequest: vi.fn(),
-}));
+vi.mock('urllib');
 
-vi.mock('urllib', () => {
-  const HttpClient = vi.fn(function (this: any) {
-    this.request = mockRequest;
-  });
-  return { HttpClient };
-});
-
-describe('handleRequest', () => {
+describe('http-digest-client', () => {
   beforeEach(() => {
-    mockRequest.mockReset();
+    vi.resetAllMocks();
   });
 
-  it('returns parsed JSON data on 2xx response', async () => {
-    const payload = { foo: 'bar' };
-    mockRequest.mockResolvedValue({
-      status: 200,
-      url: 'http://tv/api/test',
-      data: Buffer.from(JSON.stringify(payload)),
+  describe('handleRequest', () => {
+    let mockClient: any;
+
+    beforeEach(() => {
+      mockClient = {
+        request: vi.fn(),
+      };
     });
 
-    const client = new HttpClient();
-    const [err, data, resp] = await handleRequest('api/test', 'http://tv', client);
+    it('should return JSON parsed data on successful response', async () => {
+      mockClient.request.mockResolvedValue({
+        status: 200,
+        data: Buffer.from(JSON.stringify({ key: 'value' })),
+        url: 'https://test.com/api/test',
+      });
 
-    expect(err).toBeUndefined();
-    expect(data).toEqual(payload);
-    expect(resp?.status).toBe(200);
-  });
+      const result = await handleRequest('test', 'https://test.com/api', mockClient);
 
-  it('returns raw string when response body is not valid JSON', async () => {
-    mockRequest.mockResolvedValue({
-      status: 200,
-      url: 'http://tv/api/test',
-      data: Buffer.from('not-json'),
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual({ key: 'value' });
+      }
+      expect(mockClient.request).toHaveBeenCalledWith('https://test.com/api/test', {});
     });
 
-    const client = new HttpClient();
-    const [err, data] = await handleRequest('api/test', 'http://tv', client);
+    it('should return raw string data if JSON parsing fails', async () => {
+      mockClient.request.mockResolvedValue({
+        status: 200,
+        data: Buffer.from('Plain text response'),
+        url: 'https://test.com/api/test',
+      });
 
-    expect(err).toBeUndefined();
-    expect(data).toBe('not-json');
-  });
+      const result = await handleRequest('test', 'https://test.com/api', mockClient);
 
-  it('returns error when status is not 2xx', async () => {
-    mockRequest.mockResolvedValue({
-      status: 401,
-      url: 'http://tv/api/test',
-      data: Buffer.from(''),
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toBe('Plain text response');
+      }
     });
 
-    const client = new HttpClient();
-    const [err, data, resp] = await handleRequest('api/test', 'http://tv', client);
+    it('should return error if status is not 2xx', async () => {
+      mockClient.request.mockResolvedValue({
+        status: 404,
+        url: 'https://test.com/api/test',
+      });
 
-    expect(err).toBeInstanceOf(Error);
-    expect(err?.message).toContain('401');
-    expect(data).toBeUndefined();
-    expect(resp?.status).toBe(401);
-  });
+      const result = await handleRequest('test', 'https://test.com/api', mockClient);
 
-  it('returns error when request throws', async () => {
-    mockRequest.mockRejectedValue(new Error('Network error'));
-
-    const client = new HttpClient();
-    const [err, data, resp] = await handleRequest('api/test', 'http://tv', client);
-
-    expect(err).toBeInstanceOf(Error);
-    expect(err?.message).toBe('Network error');
-    expect(data).toBeUndefined();
-    expect(resp).toBeUndefined();
-  });
-
-  it('builds the correct full URL', async () => {
-    mockRequest.mockResolvedValue({
-      status: 200,
-      url: 'http://tv/api/status',
-      data: Buffer.from('{}'),
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.message).toBe('Request failed with status 404 (https://test.com/api/test)');
+      }
     });
 
-    const client = new HttpClient();
-    await handleRequest('api/status', 'http://tv', client);
+    it('should return error if request throws an exception', async () => {
+      mockClient.request.mockRejectedValue(new Error('Network timeout'));
 
-    expect(mockRequest).toHaveBeenCalledWith('http://tv/api/status', {});
-  });
+      const result = await handleRequest('test', 'https://test.com/api', mockClient);
 
-  it('forwards reqOptions to the client', async () => {
-    mockRequest.mockResolvedValue({
-      status: 200,
-      url: 'http://tv/api/test',
-      data: Buffer.from('{}'),
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.message).toBe('Network timeout');
+      }
     });
 
-    const client = new HttpClient();
-    await handleRequest('api/test', 'http://tv', client, { method: 'POST' });
+    it('should return stringified error if exception is not an Error instance', async () => {
+      mockClient.request.mockRejectedValue('String error');
 
-    expect(mockRequest).toHaveBeenCalledWith('http://tv/api/test', { method: 'POST' });
-  });
-});
+      const result = await handleRequest('test', 'https://test.com/api', mockClient);
 
-describe('getHttpDigestClient', () => {
-  it('returns a client and a request function', () => {
-    const result = getHttpDigestClient({ user: 'admin', password: 'secret', baseUrl: 'https://tv' });
-
-    expect(result.client).toBeDefined();
-    expect(typeof result.request).toBe('function');
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.message).toBe('String error');
+      }
+    });
   });
 
-  it('instantiates HttpClient with digestAuth', () => {
-    getHttpDigestClient({ user: 'admin', password: 'secret', baseUrl: 'https://tv' });
+  describe('getHttpDigestClient', () => {
+    it('should initialize HttpClient with correct config and digestAuth', () => {
+      const config = {
+        user: 'test_user',
+        password: 'test_password',
+        baseUrl: 'https://test.com',
+      };
 
-    expect(HttpClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        defaultArgs: expect.objectContaining({
-          digestAuth: 'admin:secret',
+      const result = getHttpDigestClient(config);
+
+      expect(HttpClient).toHaveBeenCalledWith({
+        connect: {
+          rejectUnauthorized: false,
+          timeout: 1000,
+        },
+        defaultArgs: {
+          digestAuth: 'test_user:test_password',
+          contentType: 'json',
+          headers: {},
+        },
+      });
+
+      expect(result.client).toBeDefined();
+      expect(typeof result.request).toBe('function');
+    });
+
+    it('should initialize HttpClient with rejectUnauthorized true when specified', () => {
+      const config = {
+        user: 'test_user',
+        password: 'test_password',
+        baseUrl: 'https://test.com',
+        options: {
+          rejectUnauthorized: true,
+        },
+      };
+
+      getHttpDigestClient(config);
+
+      expect(HttpClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connect: expect.objectContaining({
+            rejectUnauthorized: true,
+          }),
         }),
-      }),
-    );
+      );
+    });
   });
 
-  it('uses rejectUnauthorized from options when provided', () => {
-    getHttpDigestClient({ user: 'u', password: 'p', baseUrl: 'https://tv', options: { rejectUnauthorized: true } });
+  describe('getHttpClient', () => {
+    it('should initialize basic HttpClient', () => {
+      getHttpClient();
 
-    expect(HttpClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        connect: expect.objectContaining({ rejectUnauthorized: true }),
-      }),
-    );
-  });
-
-  it('defaults rejectUnauthorized to false', () => {
-    getHttpDigestClient({ user: 'u', password: 'p', baseUrl: 'https://tv' });
-
-    expect(HttpClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        connect: expect.objectContaining({ rejectUnauthorized: false }),
-      }),
-    );
-  });
-});
-
-describe('getHttpClient', () => {
-  it('returns an HttpClient instance', () => {
-    const client = getHttpClient();
-    expect(client).toBeDefined();
-  });
-
-  it('instantiates HttpClient with rejectUnauthorized false and json contentType', () => {
-    getHttpClient();
-
-    expect(HttpClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        connect: expect.objectContaining({ rejectUnauthorized: false }),
-        defaultArgs: expect.objectContaining({ contentType: 'json' }),
-      }),
-    );
+      expect(HttpClient).toHaveBeenCalledWith({
+        connect: {
+          rejectUnauthorized: false,
+          timeout: 1000,
+        },
+        defaultArgs: {
+          contentType: 'json',
+        },
+      });
+    });
   });
 });
