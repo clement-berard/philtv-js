@@ -7,7 +7,7 @@
 // Shared / Primitives
 // ----------------------------------------------------------------
 
-import type { AmbilightFollowAudioMode, AmbilightFollowVideoMode, FlatNodeType } from './jointspace';
+import { AmbilightFollowAudioMode, AmbilightFollowVideoMode } from './jointspace';
 
 export type PowerState = 'On' | 'Off' | 'Standby';
 
@@ -76,6 +76,10 @@ export type SystemInfo = {
   epgsource?: string;
   api_version: ApiVersion;
   featuring: SystemFeaturing;
+};
+
+export type SystemInfoEnriched = SystemInfo & {
+  fullApiVersion: string;
 };
 
 // ----------------------------------------------------------------
@@ -368,13 +372,7 @@ export type ActivityIntent = {
   component: ActivityComponent;
 };
 
-export type CurrentActivity =
-  | {
-      component: ActivityComponent;
-    }
-  | {
-      channel: CurrentChannel;
-    };
+export type CurrentActivity = { component: ActivityComponent } | { channel: CurrentChannel };
 
 // ----------------------------------------------------------------
 // Power state (Android TV / API v6+)
@@ -392,35 +390,57 @@ export type PowerStatePayload = {
 // Menu Items / Settings (API v6)
 // ----------------------------------------------------------------
 
+export type FlatNodeType = 'SLIDER_NODE' | 'LIST_NODE' | 'TOGGLE_NODE' | (string & {});
+
+/** @internal */
 export type MenuItemNode = {
   node_id: number;
-  context?: string;
+  type: FlatNodeType;
   string_id?: string;
-  type?: FlatNodeType;
+  context?: string;
   data?: unknown;
 };
 
+// GET /menuitems/settings/structure
+export type MenuItemsSettingsResponse = {
+  version: number;
+  node: MenuItemNode;
+};
+
+// POST /menuitems/settings/current - request
 export type MenuItemsSettingsRequest = {
   nodes: Array<{ nodeid: number }>;
 };
 
+// POST /menuitems/settings/current - response
+export type MenuSettingValueData = Record<string, unknown>;
+
+export type MenuSettingValue = {
+  value: {
+    Nodeid: number;
+    Controllable?: 'true' | 'false';
+    Available?: 'true' | 'false';
+    data?: MenuSettingValueData;
+  };
+};
+
+export type MenuItemsCurrentResponseNode = {
+  version: number;
+  values: MenuSettingValue[];
+};
+
+// POST /menuitems/settings/update - request
 export type MenuItemsSettingsValue = {
   value: {
     Nodeid: number;
     Controllable?: 'true' | 'false';
     Available?: 'true' | 'false';
-    string_id?: string;
     data?: unknown;
   };
 };
 
 export type MenuItemsSettingsUpdatePayload = {
   values: MenuItemsSettingsValue[];
-};
-
-export type MenuItemsSettingsResponse = {
-  version: number;
-  node: MenuItemNode[];
 };
 
 // ----------------------------------------------------------------

@@ -1,5 +1,12 @@
 import type { ApiResult, getHttpDigestClient } from '../http-clients/http-digest-client';
-import type { FlatNodeType, MenuItemNode, MenuItemsSettingsResponse, MenuItemsSettingsUpdatePayload } from '../types';
+import {
+  FlatNodeType,
+  MenuItemNode,
+  MenuItemsCurrentResponseNode,
+  MenuItemsSettingsRequest,
+  MenuItemsSettingsUpdatePayload,
+  MenuSettingValue,
+} from '../types';
 import { getFlattenNodes } from '../utils';
 
 function buildMenuItemData(type: FlatNodeType, value: unknown): unknown {
@@ -74,5 +81,30 @@ export class MenuApi {
     }
 
     return { success: true, data: '' };
+  }
+
+  /**
+   * Retrieves the current setting values for a given menu node.
+   *
+   * @param nodeId - The node ID of the menu item to query.
+   * @returns A result object containing the setting values, or an error if none are found.
+   */
+  async getCurrentSetting(nodeId: number): Promise<ApiResult<MenuSettingValue[]>> {
+    const res = await this.digestClient.request<MenuItemsCurrentResponseNode>('menuitems/settings/current', {
+      method: 'POST',
+      data: { nodes: [{ nodeid: nodeId }] } satisfies MenuItemsSettingsRequest,
+    });
+
+    if (!res.success) {
+      return res;
+    }
+
+    const values = res.data.values;
+
+    if (values?.length > 0) {
+      return { success: true, data: values };
+    }
+
+    return { success: false, error: new Error('menuitems/settings/current: No values') };
   }
 }

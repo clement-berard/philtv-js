@@ -5,21 +5,14 @@ import {
   ambilightFollowVideoModeSchema,
   ambilightModesSchema,
 } from '../schemas/jointspace.schema';
-import type {
+import {
   AmbilightBrightnessChoices,
   AmbilightFollowAudioMode,
   AmbilightFollowVideoMode,
   AmbilightModes,
+  MenuSettingValue,
 } from '../types';
 import type { MenuApi } from './MenuApi';
-
-/** @internal */
-export interface MenuSettingValue {
-  value?: unknown;
-  data?: {
-    value?: string | number;
-  };
-}
 
 /**
  * Provides methods to interact with the Ambilight context,
@@ -57,55 +50,27 @@ export class AmbilightApi {
   }
 
   /**
-   * Retrieves the current setting values for a given menu node.
-   *
-   * @param nodeId - The node ID of the menu item to query.
-   * @returns A result object containing the setting values, or an error if none are found.
-   */
-  async getCurrentSetting(nodeId: number): Promise<ApiResult> {
-    const res = await this.digestClient.request<unknown[]>('menuitems/settings/current', {
-      method: 'POST',
-      data: { nodes: [{ nodeid: nodeId }] },
-    });
-
-    if (!res.success) {
-      return res;
-    }
-
-    const node = res.data[1] as Record<string, unknown>;
-    const values = node?.values as MenuSettingValue[];
-    const hasValues = values?.length > 0;
-
-    if (hasValues) {
-      return { success: true, data: values };
-    }
-
-    return { success: false, error: new Error('menuitems/settings/current: No values') };
-  }
-
-  /**
    * Retrieves the full menu setting information for the Ambilight brightness item.
    *
    * @returns A result object containing the raw setting value, or `undefined` if the node is not found.
    */
-  async getAmbilightBrightnessInformation(): Promise<ApiResult> {
+  async getAmbilightBrightnessInformation(): Promise<ApiResult<MenuSettingValue['value']>> {
     const itemRes = await this.menuApi.getMenuStructureItem('ambilight_brightness');
 
     if (!itemRes.success) {
-      return itemRes;
+      return { success: false, error: itemRes.error };
     }
 
     if (!itemRes.data?.node_id) {
-      return { success: true, data: undefined };
+      return { success: false, error: new Error('Failed to fetch menu structure item') };
     }
 
-    const valuesRes = await this.getCurrentSetting(itemRes.data.node_id);
+    const valuesRes = await this.menuApi.getCurrentSetting(itemRes.data.node_id);
 
     if (!valuesRes.success) {
-      return valuesRes;
+      return { success: false, error: valuesRes.error };
     }
 
-    // @ts-expect-error
     return { success: true, data: valuesRes.data?.[0]?.value };
   }
 
@@ -117,14 +82,14 @@ export class AmbilightApi {
   async getAmbilightBrightnessValue(): Promise<ApiResult<number>> {
     const infoRes = await this.getAmbilightBrightnessInformation();
 
-    if (!infoRes.success) {
-      return infoRes;
+    if (infoRes.success) {
+      const info = infoRes.data;
+      const rawValue = info?.data?.value ?? 0;
+
+      return { success: true, data: Number(rawValue) };
     }
 
-    const info = infoRes.data as MenuSettingValue | undefined;
-    const rawValue = info?.data?.value ?? 0;
-
-    return { success: true, data: Number(rawValue) };
+    return { success: false, error: new Error('Failed to fetch ambilight brightness value') };
   }
 
   /**
