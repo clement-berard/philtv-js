@@ -8,7 +8,7 @@ import type {
 } from '../schemas/jointspace.schema';
 
 /** @internal */
-export type InputKeys = z.infer<typeof inputKeysSchema>;
+export type InputKey = z.infer<typeof inputKeysSchema>;
 
 /** @internal */
 export type AmbilightFollowVideoMode = z.infer<typeof ambilightFollowVideoModeSchema>;
@@ -20,4 +20,4 @@ export type AmbilightFollowAudioMode = z.infer<typeof ambilightFollowAudioModeSc
 export type AmbilightBrightnessChoices = z.infer<typeof ambilightBrightnessChoicesSchema>;
 
 /** @internal */
-export type AmbilightModes = z.infer<typeof ambilightModesSchema>;
+export type AmbilightMode = z.infer<typeof ambilightModesSchema>;

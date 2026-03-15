@@ -9,7 +9,8 @@ import {
   AmbilightBrightnessChoices,
   AmbilightFollowAudioMode,
   AmbilightFollowVideoMode,
-  AmbilightModes,
+  AmbilightModeResponse,
+  AmbilightMode,
   MenuSettingValue,
 } from '../types';
 import type { MenuApi } from './MenuApi';
@@ -79,7 +80,7 @@ export class AmbilightApi {
    *
    * @returns A result object containing the brightness level as a number.
    */
-  async getAmbilightBrightnessValue(): Promise<ApiResult<number>> {
+  async getBrightnessValue(): Promise<ApiResult<number>> {
     const infoRes = await this.getAmbilightBrightnessInformation();
 
     if (infoRes.success) {
@@ -97,8 +98,8 @@ export class AmbilightApi {
    *
    * @returns A result object from {@link setAmbilightBrightness}.
    */
-  async increaseAmbilightBrightness(): Promise<ApiResult> {
-    const currentRes = await this.getAmbilightBrightnessValue();
+  async increaseBrightness(): Promise<ApiResult> {
+    const currentRes = await this.getBrightnessValue();
 
     if (!currentRes.success) {
       return currentRes;
@@ -115,8 +116,8 @@ export class AmbilightApi {
    *
    * @returns A result object from {@link setAmbilightBrightness}.
    */
-  async decreaseAmbilightBrightness() {
-    const currentRes = await this.getAmbilightBrightnessValue();
+  async decreaseBrightness() {
+    const currentRes = await this.getBrightnessValue();
 
     if (!currentRes.success) {
       return currentRes;
@@ -133,8 +134,32 @@ export class AmbilightApi {
    *
    * @returns A result object containing the current mode data.
    */
-  getAmbilightMode() {
+  getMode(): Promise<ApiResult<AmbilightModeResponse>> {
     return this.digestClient.request('ambilight/mode');
+  }
+
+  /**
+   * Sets the global Ambilight mode (e.g. `INTERNAL`, `MANUAL`, `OFF`).
+   *
+   * @param mode - The mode to activate.
+   * @returns A result object indicating success or failure.
+   */
+  setMode(mode: AmbilightMode) {
+    try {
+      const _mode = ambilightModesSchema.parse(mode);
+
+      return this.digestClient.request('ambilight/mode', {
+        method: 'POST',
+        data: {
+          current: _mode,
+        },
+      });
+    } catch (err) {
+      return Promise.resolve({
+        success: false,
+        error: err instanceof Error ? err : new Error(String(err)),
+      });
+    }
   }
 
   /**
@@ -143,12 +168,12 @@ export class AmbilightApi {
    *
    * @returns A result object containing all Ambilight context data.
    */
-  async getAmbilightFullInformation() {
+  async getFullInformation() {
     const [configuration, brightness, mode, cached, ambiHue] = await Promise.all([
-      this.getAmbilightConfiguration(),
+      this.getConfiguration(),
       this.getAmbilightBrightnessInformation(),
-      this.getAmbilightMode(),
-      this.getAmbilightCached(),
+      this.getMode(),
+      this.getCachedState(),
       this.getAmbiHue(),
     ]);
 
@@ -170,7 +195,7 @@ export class AmbilightApi {
    * @param options - Configuration options including `styleName`, `menuSetting`, and optionally `isExpert`.
    * @returns A result object from the underlying request.
    */
-  protected async setAmbilightCurrentConfiguration(options: Record<string, unknown>) {
+  protected async setCurrentConfiguration(options: Record<string, unknown>) {
     return this.digestClient.request('ambilight/currentconfiguration', {
       method: 'POST',
       data: {
@@ -187,11 +212,11 @@ export class AmbilightApi {
    * @param mode - The follow-video mode to apply.
    * @returns A result object indicating success or failure.
    */
-  async setAmbilightFollowVideoMode(mode: AmbilightFollowVideoMode) {
+  async setFollowVideoMode(mode: AmbilightFollowVideoMode) {
     try {
       const _mode = ambilightFollowVideoModeSchema.parse(mode);
 
-      return this.setAmbilightCurrentConfiguration({
+      return this.setCurrentConfiguration({
         styleName: 'FOLLOW_VIDEO',
         menuSetting: _mode,
       });
@@ -209,11 +234,11 @@ export class AmbilightApi {
    * @param mode - The follow-audio mode to apply.
    * @returns A result object indicating success or failure.
    */
-  async setAmbilightFollowAudioMode(mode: AmbilightFollowAudioMode) {
+  async setFollowAudioMode(mode: AmbilightFollowAudioMode) {
     try {
       const _mode = ambilightFollowAudioModeSchema.parse(mode);
 
-      return this.setAmbilightCurrentConfiguration({
+      return this.setCurrentConfiguration({
         styleName: 'FOLLOW_AUDIO',
         menuSetting: _mode,
       });
@@ -226,35 +251,11 @@ export class AmbilightApi {
   }
 
   /**
-   * Sets the global Ambilight mode (e.g. `INTERNAL`, `MANUAL`, `OFF`).
-   *
-   * @param mode - The mode to activate.
-   * @returns A result object indicating success or failure.
-   */
-  setAmbilightMode(mode: AmbilightModes) {
-    try {
-      const _mode = ambilightModesSchema.parse(mode);
-
-      return this.digestClient.request('ambilight/mode', {
-        method: 'POST',
-        data: {
-          current: _mode,
-        },
-      });
-    } catch (err) {
-      return Promise.resolve({
-        success: false,
-        error: err instanceof Error ? err : new Error(String(err)),
-      });
-    }
-  }
-
-  /**
    * Retrieves the cached Ambilight color data.
    *
    * @returns A result object containing the cached state.
    */
-  getAmbilightCached() {
+  getCachedState() {
     return this.digestClient.request('ambilight/cached');
   }
 
@@ -272,7 +273,7 @@ export class AmbilightApi {
    *
    * @returns A result object containing the current configuration.
    */
-  getAmbilightConfiguration() {
+  getConfiguration() {
     return this.digestClient.request('ambilight/currentconfiguration');
   }
 }
