@@ -1,5 +1,5 @@
 import { omit } from 'radash';
-import type { FlatNode } from '../types';
+import type { MenuItemNode } from '../types';
 
 export function getDeviceObject(deviceId: string) {
   return {
@@ -12,8 +12,8 @@ export function getDeviceObject(deviceId: string) {
   };
 }
 
-export function getFlattenNodes(allInput: any) {
-  const result: FlatNode[] = [];
+export function getFlattenNodes(allInput: any): MenuItemNode[] {
+  const result: MenuItemNode[] = [];
 
   function flattenNodes(node: any) {
     const { node_id, type, string_id, context, data } = node;
@@ -27,6 +27,5 @@ export function getFlattenNodes(allInput: any) {
   }
 
   flattenNodes(allInput);
-
   return result;
 }

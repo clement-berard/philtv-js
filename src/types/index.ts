@@ -1,33 +1,15 @@
+import type { z } from 'zod';
+import type { philTVApiParamsSchemas } from '../schemas/philtvApi.schema';
+
 /**
  * Parameters required to initialize the `PhilTVApiBase` class.
  *
  * This object includes the API connection details and optional configuration settings.
+ *
+ * @internal
  */
-export type PhilTVApiParams = {
-  /**
-   * The URL of the Philips TV API to connect to.
-   * Include the protocol, IP address, port number and API version.
-   * @example https://192.168.0.22:1926/6
-   */
-  apiUrl: string;
+export type PhilTVApiParams = z.infer<typeof philTVApiParamsSchemas>;
 
-  /**
-   * The username for authentication with the API.
-   */
-  user: string;
-
-  /**
-   * The password for authentication with the API.
-   */
-  password: string;
-};
-
-export type FlatNode = {
-  node_id: number;
-  type: string;
-  string_id?: string;
-  context?: string;
-  data?: unknown;
-};
-
+export type { GetFullAmbilightInformationResult } from '../lib/ambilight/getFullInformation';
 export type * from './jointspace';
+export type * from './jointspace-api.types';
