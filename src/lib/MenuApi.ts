@@ -1,5 +1,5 @@
 import type { ApiResult, getHttpDigestClient } from '../http-clients/http-digest-client';
-import {
+import type {
   FlatNodeType,
   MenuItemNode,
   MenuItemsCurrentResponseNode,

@@ -10,16 +10,6 @@ import type { philTVApiParamsSchemas } from '../schemas/philtvApi.schema';
  */
 export type PhilTVApiParams = z.infer<typeof philTVApiParamsSchemas>;
 
-// export type FlatNodeType = 'SLIDER_NODE' | 'LIST_NODE' | 'TOGGLE_NODE' | string;
-//
-// /** @internal */
-// export type FlatNode = {
-//   node_id: number;
-//   type: FlatNodeType;
-//   string_id?: string;
-//   context?: string;
-//   data?: unknown;
-// };
-
+export type { GetFullAmbilightInformationResult } from '../lib/ambilight/getFullInformation';
 export type * from './jointspace';
 export type * from './jointspace-api.types';

@@ -7,7 +7,7 @@
 // Shared / Primitives
 // ----------------------------------------------------------------
 
-import { AmbilightFollowAudioMode, AmbilightFollowVideoMode, AmbilightMode, InputKey } from './jointspace';
+import type { AmbilightFollowAudioMode, AmbilightFollowVideoMode, AmbilightMode, InputKey } from './jointspace';
 
 export type PowerState = 'On' | 'Off' | 'Standby';
 
