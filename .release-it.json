@@ -15,7 +15,7 @@
   },
   "npm": {
     "publish": true,
-    "tag": "latest",
+    "tag": "legacy",
     "tokenRef": "NPM_TOKEN"
   },
   "plugins": {
