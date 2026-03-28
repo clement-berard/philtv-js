@@ -44,7 +44,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - name: Setup Pages
@@ -53,7 +53,7 @@ jobs:
       - name: Build with VitePress
         env:
           RELEASE_VERSION: ${{ github.event.release.tag_name }}
-        run: pnpm docs:generate
+        run: docs:build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
